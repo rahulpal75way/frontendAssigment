@@ -60,6 +60,13 @@ const txnSlice = createSlice({
         type: "withdrawal",
       });
     },
+    updateTxnStatusByReferenceId(state, action) {
+      const { referenceId, status } = action.payload;
+      const txn = state.txns.find((t) => t.id === referenceId);
+      if (txn) {
+        txn.status = status;
+      }
+    },
   },
 });
 
@@ -70,6 +77,7 @@ export const {
   addCommission,
   recordDeposit,
   recordWithdrawal,
+  updateTxnStatusByReferenceId,
 } = txnSlice.actions;
 
 export default txnSlice.reducer;

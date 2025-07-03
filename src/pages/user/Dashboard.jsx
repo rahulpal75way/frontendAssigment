@@ -1,95 +1,102 @@
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
+import { Typography, Grid, Card, IconButton, Box } from "@mui/material";
 import {
-  Card,
-  Typography,
-  Grid,
-  Box,
-  Avatar,
-  LinearProgress,
-  Chip,
-  IconButton,
-  Paper,
-} from "@mui/material";
-import {
-  AccountBalanceWallet,
-  TrendingUp,
-  TrendingDown,
+  Visibility,
   Send,
   GetApp,
-  MoreVert,
-  Visibility,
   Add,
-  ArrowUpward,
-  ArrowDownward,
   History as HistoryIcon,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import StatsCard from "../../components/StatsCard";
+import QuickActionCard from "../../components/QuickActionCard";
+import RecentTransactionCard from "../../components/RecentTransactionCard";
+
+
 
 const UserDashboard = () => {
   const user = useSelector((state) => state.auth.user);
   const balance = useSelector((state) => state.wallet.balances[user.id] || 0);
-  const navigate = useNavigate();
+  const users = useSelector((state) => state.users.users);
   const txns = useSelector((state) => state.txns.txns);
   const deposits = useSelector((state) => state.wallet.pendingDeposits);
   const withdrawals = useSelector((state) => state.wallet.pendingWithdrawals);
 
+  const totalTransfers = useMemo(
+    () =>
+      txns
+        .filter(
+          (txn) =>
+            (txn.from === user.id || txn.to === user.id) &&
+            txn.status === "approved"
+        )
+        .reduce((sum, txn) => sum + txn.amount, 0),
+    [txns, user.id]
+  );
 
-  const totalTransfers = txns
-    .filter(
-      (txn) =>
-        (txn.from === user.id || txn.to === user.id) &&
-        txn.status === "approved"
-    )
-    .reduce((sum, txn) => sum + txn.amount, 0);
+  const totalDeposits = useMemo(
+    () =>
+      deposits
+        .filter((d) => d.userId === user.id && d.status === "approved")
+        .reduce((sum, d) => sum + d.amount, 0),
+    [deposits, user.id]
+  );
 
-  const totalDeposits = deposits
-    .filter((d) => d.userId === user.id && d.status === "approved")
-    .reduce((sum, d) => sum + d.amount, 0);
+  const totalWithdrawals = useMemo(
+    () =>
+      withdrawals
+        .filter((w) => w.userId === user.id && w.status === "approved")
+        .reduce((sum, w) => sum + w.amount, 0),
+    [withdrawals, user.id]
+  );
 
-  const totalWithdrawals = withdrawals
-    .filter((w) => w.userId === user.id && w.status === "approved")
-    .reduce((sum, w) => sum + w.amount, 0);
-
-  const stats = [
-    {
-      title: "Total Balance",
-      value: `₹${balance.toFixed(2)}`,
-      change: "+12.5%",
-      trend: "up",
-      icon: <AccountBalanceWallet className="text-2xl" />,
-      color: "from-blue-500 to-cyan-500",
+  const getUserName = useCallback(
+    (id) => {
+      if (!id) return "System";
+      const userObj = users.find((u) => u.id === id);
+      return userObj ? userObj.name : `User ${id}`;
     },
-    {
-      title: "Total Deposits",
-      value: `₹${totalDeposits.toFixed(2)}`,
-      change: "+10%",
-      trend: "up",
-      icon: <ArrowDownward className="text-2xl" />,
-      color: "from-green-500 to-emerald-500",
-    },
-    {
-      title: "Total Withdrawals",
-      value: `₹${totalWithdrawals.toFixed(2)}`,
-      change: "-5%",
-      trend: "down",
-      icon: <ArrowUpward className="text-2xl" />,
-      color: "from-red-500 to-pink-500",
-    },
-  ];
+    [users]
+  );
 
-  const users = useSelector((state) => state.users.users);
+  const stats = useMemo(
+    () => [
+      {
+        title: "Total Balance",
+        value: `₹${balance.toFixed(2)}`,
+        change: "+12.5%",
+        trend: "up",
+        icon: <Send />,
+        color: "from-blue-500 to-cyan-500",
+      },
+      {
+        title: "Total Deposits",
+        value: `₹${totalDeposits.toFixed(2)}`,
+        change: "+10%",
+        trend: "up",
+        icon: <Add />,
+        color: "from-green-500 to-emerald-500",
+      },
+      {
+        title: "Total Withdrawals",
+        value: `₹${totalWithdrawals.toFixed(2)}`,
+        change: "-5%",
+        trend: "down",
+        icon: <GetApp />,
+        color: "from-red-500 to-pink-500",
+      },
+    ],
+    [balance, totalDeposits, totalWithdrawals]
+  );
 
-  const getUserName = (id) => {
-    if (!id) return "System";
-    const user = users.find((u) => u.id === id);
-    return user ? user.name : `User ${id}`;
-  };
-
-  const recentTransactions = txns
-    .filter((txn) => txn.from === user.id || txn.to === user.id)
-    .slice(-5) 
-    .reverse(); 
+  const recentTransactions = useMemo(
+    () =>
+      txns
+        .filter((txn) => txn.from === user.id || txn.to === user.id)
+        .slice(-5)
+        .reverse(),
+    [txns, user.id]
+  );
 
   const quickActions = [
     {
@@ -118,203 +125,56 @@ const UserDashboard = () => {
     },
   ];
 
-  console.log("totalDeposits,  =", totalDeposits, totalWithdrawals);
-  console.log("user", user);
-  console.log("deposits", deposits);
-  console.log("withdrawals", withdrawals);
-  console.log("txns", txns);
-  console.log("user", user);
-
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="mb-8">
-        <Typography variant="h4" className="font-bold text-gray-800 mb-2">
-          Welcome back, {user.name}! 👋
-        </Typography>
-        <Typography variant="body1" className="text-gray-600">
-          Here's what's happening with your wallet today.
-        </Typography>
-      </div>
+      <Typography variant="h4">Welcome back, {user.name} 👋</Typography>
 
-      {/* Stats Cards */}
       <Grid container spacing={3}>
-        {stats.map((stat, index) => (
-          <Grid item xs={12} md={4} key={index}>
-            <Card
-              elevation={0}
-              className="relative overflow-hidden backdrop-blur-lg bg-white/70 border border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105"
-              sx={{
-                borderRadius: 3,
-                background: "rgba(255, 255, 255, 0.8)",
-                backdropFilter: "blur(20px)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-              }}
-            >
-              <Box className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div
-                    className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${stat.color} flex items-center justify-center text-white shadow-lg`}
-                  >
-                    {stat.icon}
-                  </div>
-                  <IconButton size="small" className="text-gray-400">
-                    <MoreVert />
-                  </IconButton>
-                </div>
-
-                <Typography
-                  variant="h4"
-                  className="font-bold text-gray-800 mb-2"
-                >
-                  {stat.value}
-                </Typography>
-
-                <div className="flex items-center justify-between">
-                  <Typography variant="body2" className="text-gray-600">
-                    {stat.title}
-                  </Typography>
-                  <Chip
-                    label={stat.change}
-                    size="small"
-                    className={`${
-                      stat.trend === "up"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                    icon={
-                      stat.trend === "up" ? (
-                        <TrendingUp className="text-sm" />
-                      ) : (
-                        <TrendingDown className="text-sm" />
-                      )
-                    }
-                  />
-                </div>
-              </Box>
-            </Card>
+        {stats.map((stat, idx) => (
+          <Grid item xs={12} md={4} key={idx}>
+            <StatsCard stat={stat} />
           </Grid>
         ))}
       </Grid>
 
       <Grid container spacing={3}>
-        {/* Quick Actions */}
         <Grid item xs={12} md={4}>
-          <Card
-            elevation={0}
-            className="backdrop-blur-lg bg-white/70 border border-white/20 h-full"
-            sx={{
-              borderRadius: 3,
-              background: "rgba(255, 255, 255, 0.8)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-            }}
-          >
+          <Card className="h-full">
             <Box className="p-6">
-              <Typography
-                variant="h6"
-                className="font-semibold text-gray-800 mb-4"
-              >
+              <Typography variant="h6" className="mb-4">
                 Quick Actions
               </Typography>
-
               <div className="space-y-3">
-                {quickActions.map((action, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center p-4 rounded-2xl bg-white/50 hover:bg-white/70 cursor-pointer transition-all duration-200 hover:scale-105"
-                    onClick={() => navigate(action.path)}
-                  >
-                    <div
-                      className={`w-10 h-10 rounded-xl bg-gradient-to-r ${action.color} flex items-center justify-center text-white mr-4`}
-                    >
-                      {action.icon}
-                    </div>
-                    <Typography
-                      variant="body1"
-                      className="font-medium text-gray-700"
-                    >
-                      {action.title}
-                    </Typography>
-                  </div>
+                {quickActions.map((action, idx) => (
+                  <QuickActionCard key={idx} action={action} />
                 ))}
               </div>
             </Box>
           </Card>
         </Grid>
 
-        {/* Recent Transactions */}
         <Grid item xs={12} md={8}>
-          <Card
-            elevation={0}
-            className="backdrop-blur-lg bg-white/70 border border-white/20 h-full"
-            sx={{
-              borderRadius: 3,
-              background: "rgba(255, 255, 255, 0.8)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-            }}
-          >
+          <Card className="h-full">
             <Box className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <Typography
-                  variant="h6"
-                  className="font-semibold text-gray-800"
-                >
-                  Recent Transactions
-                </Typography>
+                <Typography variant="h6">Recent Transactions</Typography>
                 <IconButton size="small" className="text-gray-400">
                   <Visibility />
                 </IconButton>
               </div>
-
               <div className="space-y-4">
                 {recentTransactions.map((txn) => {
                   const isSender = txn.from === user.id;
-                  const otherPartyId = isSender ? txn.to : txn.from;
-                  const otherName = getUserName(otherPartyId);
-                  const amount = txn.amount;
-
+                  const otherParty = isSender ? txn.to : txn.from;
+                  const otherName = getUserName(otherParty);
                   return (
-                    <div
+                    <RecentTransactionCard
                       key={txn.id}
-                      className="flex items-center justify-between p-4 rounded-2xl bg-white/50 hover:bg-white/70 transition-all duration-200"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-600">
-                          {otherName.charAt(0)}
-                        </Avatar>
-                        <div>
-                          <Typography
-                            variant="body1"
-                            className="font-medium text-gray-800"
-                          >
-                            {isSender
-                              ? `To: ${otherName}`
-                              : `From: ${otherName}`}
-                          </Typography>
-                          <Typography variant="body2" className="text-gray-500">
-                            {txn.type} • {txn.status}
-                          </Typography>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <Typography
-                          variant="body1"
-                          className={`font-semibold ${
-                            isSender ? "text-red-600" : "text-green-600"
-                          }`}
-                        >
-                          {isSender ? "-" : "+"}₹{amount}
-                        </Typography>
-                        {isSender ? (
-                          <ArrowUpward className="text-red-600 text-sm" />
-                        ) : (
-                          <ArrowDownward className="text-green-600 text-sm" />
-                        )}
-                      </div>
-                    </div>
+                      txn={txn}
+                      isSender={isSender}
+                      otherName={otherName}
+                      amount={txn.amount}
+                    />
                   );
                 })}
               </div>

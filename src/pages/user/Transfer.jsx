@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { initiateTransfer } from "../../features/transaction/txnSlice";
 import {
@@ -19,13 +19,12 @@ import {
   SwapHoriz,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
+import { mockUsers } from "../../utils/data";
 
 const Transfer = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const users = useSelector((state) => state.users.users).filter(
-    (u) => u.id !== user.id
-  );
+  const users = useMemo(()=> mockUsers.filter((u)=> u.id !== user.id && u.role !== "admin"), [user.id])
 
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");

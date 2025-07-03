@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { requestDeposit } from "../../features/wallet/walletSlice";
+import { handleRequestDeposit, requestDeposit } from "../../features/wallet/walletSlice";
 import {
   TextField,
   Button,
@@ -41,7 +41,7 @@ const Deposit = () => {
 
     setTimeout(() => {
       dispatch(
-        requestDeposit({
+        handleRequestDeposit({
           userId: user.id,
           amount: parseFloat(amount),
         })

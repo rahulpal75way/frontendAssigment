@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
-import { addCommission, recordDeposit, recordWithdrawal } from "../transaction/txnSlice";
+import { addCommission, initiateTransfer, recordDeposit, recordWithdrawal, updateTxnStatusByReferenceId } from "../transaction/txnSlice";
 
 const savedWallet = JSON.parse(localStorage.getItem("app_state"))?.wallet;
 
@@ -97,10 +97,9 @@ export const handleApproveDeposit = (id) => (dispatch, getState) => {
     );
 
     dispatch(
-      recordDeposit({
-        from: null,
-        to: depositReq.userId,
-        amount: depositReq.amount,
+      updateTxnStatusByReferenceId({
+        referenceId: id, // ✅ same id as original `initiateTransfer`
+        status: "approved",
       })
     );
   }
@@ -116,10 +115,9 @@ export const handleApproveWithdrawal = (id) => (dispatch, getState) => {
     dispatch(approveWithdrawal({ id }));
 
     dispatch(
-      recordWithdrawal({
-        from: withdrawalReq.userId,
-        to: null,
-        amount: withdrawalReq.amount,
+      updateTxnStatusByReferenceId({
+        referenceId: id,
+        status: "approved",
       })
     );
 
@@ -154,5 +152,41 @@ export const handleRejectWithdrawal = (id) => (dispatch, getState) => {
     dispatch(rejectWithdrawal({ id }));
   }
 };
+
+export const handleRequestDeposit = (payload) => (dispatch) => {
+  const id = uuidv4();
+
+  dispatch(requestDeposit({ id, ...payload }));
+
+  dispatch(
+    initiateTransfer({
+      id, // 👈 same ID used in txn & wallet
+      from: null,
+      to: payload.userId,
+      amount: payload.amount,
+      action: "deposit",
+      type: "deposit",
+    })
+  );
+};
+
+
+export const handleRequestWithdrawal = (payload) => (dispatch) => {
+  const id = uuidv4();
+
+  dispatch(requestWithdrawal({ id, ...payload }));
+
+  dispatch(
+    initiateTransfer({
+      id,
+      from: payload.userId,
+      to: null,
+      amount: payload.amount,
+      action: "withdrawal",
+      type: "withdrawal",
+    })
+  );
+};
+
 
 

@@ -1,9 +1,8 @@
-
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
-const PublicRoute = ({ children }) => {
+const PublicRoute = () => {
   const user = useAuth();
 
   if (user?.role === "admin") {
@@ -12,7 +11,7 @@ const PublicRoute = ({ children }) => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return <>{children}</>;
+  return <Outlet />; // ✅ This is necessary to render nested routes like /login
 };
 
 export default PublicRoute;

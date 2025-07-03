@@ -7,12 +7,15 @@ import { store } from "./app/store";
 import { Toaster } from "react-hot-toast";
 
 import "./index.css"; 
+import { ThemeContextProvider } from "./context/ThemeContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Provider store={store}>
-    <BrowserRouter>
-      <Toaster/>
-      <App />
-    </BrowserRouter>
-  </Provider>
+  <ThemeContextProvider>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Toaster />
+        <App />
+      </BrowserRouter>
+    </Provider>
+  </ThemeContextProvider>
 );

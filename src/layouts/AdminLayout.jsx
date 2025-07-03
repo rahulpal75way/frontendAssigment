@@ -32,6 +32,7 @@ import {
 import useAuth from "../hooks/useAuth";
 import { useDispatch } from "react-redux";
 import { logout } from "../features/auth/authSlice";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 const AdminLayout = () => {
   const user = useAuth();
@@ -67,14 +68,14 @@ const AdminLayout = () => {
   };
 
   const handleLogout = () => {
-      dispatch(logout())
-      setAnchorEl(null);
-      handleProfileMenuClose()
-    };
-  
-    const handleProfileMenuClose = () => {
-      setAnchorEl(null);
-    };
+    dispatch(logout());
+    setAnchorEl(null);
+    handleProfileMenuClose();
+  };
+
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -187,136 +188,138 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          zIndex: theme.zIndex.drawer + 10,
-          backgroundColor: "rgba(255, 255, 255, 0.85)",
-          backdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-        }}
-      >
-        <Toolbar className="justify-between">
-          <div className="flex items-center">
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { md: "none" } }}
-            >
-              <MenuIcon className="text-black" />
-            </IconButton>
-            <Typography variant="h6" className="font-semibold text-gray-800">
-              {navigationItems.find((item) => isActive(item.path))?.text ||
-                "Dashboard"}
-            </Typography>
-          </div>
-          <div className="flex items-center space-x-3">
-            <IconButton className="text-gray-600 hover:bg-white/50">
-              <Notifications />
-            </IconButton>
-            <IconButton
-              onClick={handleProfileMenuOpen}
-              className="text-gray-600"
-            >
-              <Avatar
-                className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600"
-                src={user.avatar}
-              >
-                {user.name?.charAt(0)}
-              </Avatar>
-            </IconButton>
-          </div>
-        </Toolbar>
-      </AppBar>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleProfileMenuClose}
-        PaperProps={{
-          sx: {
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        <AppBar
+          position="fixed"
+          elevation={0}
+          sx={{
+            zIndex: theme.zIndex.drawer + 10,
+            backgroundColor: "rgba(255, 255, 255, 0.85)",
             backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            borderRadius: 2,
-            mt: 1,
-            minWidth: 200,
-          },
-        }}
-      >
-        <MenuItem className="hover:bg-white/50">
-          <AccountCircle className="mr-3 text-gray-600" />
-          Profile
-        </MenuItem>
-        <Divider />
-        <MenuItem
-          onClick={handleLogout}
-          className="hover:bg-red-50 text-red-600"
+            borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+          }}
         >
-          <Logout className="mr-3" />
-          Logout
-        </MenuItem>
-      </Menu>
+          <Toolbar className="justify-between">
+            <div className="flex items-center">
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2, display: { md: "none" } }}
+              >
+                <MenuIcon className="text-black" />
+              </IconButton>
+              <Typography variant="h6" className="font-semibold text-gray-800">
+                {navigationItems.find((item) => isActive(item.path))?.text ||
+                  "Dashboard"}
+              </Typography>
+            </div>
+            <div className="flex items-center space-x-3">
+              <IconButton className="text-gray-600 hover:bg-white/50">
+                <Notifications />
+              </IconButton>
+              <IconButton
+                onClick={handleProfileMenuOpen}
+                className="text-gray-600"
+              >
+                <Avatar
+                  className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600"
+                  src={user.avatar}
+                >
+                  {user.name?.charAt(0)}
+                </Avatar>
+              </IconButton>
+            </div>
+          </Toolbar>
+        </AppBar>
 
-      <Box
-        component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-      >
-        <Drawer
-          variant="temporary"
-          open={isMobile ? mobileOpen : true}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: "block", md: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: 280,
-              border: "none",
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleProfileMenuClose}
+          PaperProps={{
+            sx: {
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
               backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              borderRadius: 2,
+              mt: 1,
+              minWidth: 200,
             },
           }}
         >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: "none", md: "block" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-              border: "none",
-              backgroundColor: "rgba(255, 255, 255, 0.85)",
-              backdropFilter: "blur(20px)",
-              transition: "width 0.3s ease",
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
+          <MenuItem className="hover:bg-white/50">
+            <AccountCircle className="mr-3 text-gray-600" />
+            Profile
+          </MenuItem>
+          <Divider />
+          <MenuItem
+            onClick={handleLogout}
+            className="hover:bg-red-50 text-red-600"
+          >
+            <Logout className="mr-3" />
+            Logout
+          </MenuItem>
+        </Menu>
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
-          mt: 8,
-          transition: "margin 0.3s ease, width 0.3s ease",
-        }}
-      >
-        <Outlet />
-      </Box>
-    </div>
+        <Box
+          component="nav"
+          sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        >
+          <Drawer
+            variant="temporary"
+            open={isMobile ? mobileOpen : true}
+            onClose={handleDrawerToggle}
+            ModalProps={{ keepMounted: true }}
+            sx={{
+              display: { xs: "block", md: "none" },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: 280,
+                border: "none",
+                backgroundColor: "rgba(255, 255, 255, 0.85)",
+                backdropFilter: "blur(20px)",
+              },
+            }}
+          >
+            {drawer}
+          </Drawer>
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: "none", md: "block" },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+                border: "none",
+                backgroundColor: "rgba(255, 255, 255, 0.85)",
+                backdropFilter: "blur(20px)",
+                transition: "width 0.3s ease",
+              },
+            }}
+            open
+          >
+            {drawer}
+          </Drawer>
+        </Box>
+
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            width: { md: `calc(100% - ${drawerWidth}px)` },
+            ml: { md: `${drawerWidth}px` },
+            mt: 8,
+            transition: "margin 0.3s ease, width 0.3s ease",
+          }}
+        >
+          <Outlet />
+        </Box>
+      </div>
+    </ErrorBoundary>
   );
 };
 

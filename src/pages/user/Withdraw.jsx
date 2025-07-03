@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { requestWithdrawal } from "../../features/wallet/walletSlice";
+import { handleRequestWithdrawal, requestWithdrawal } from "../../features/wallet/walletSlice";
 import {
   TextField,
   Button,
@@ -41,11 +41,11 @@ const Withdraw = () => {
 
     setTimeout(() => {
       dispatch(
-        requestWithdrawal({
+        handleRequestWithdrawal({
           userId: user.id,
           amount: parseFloat(amount),
         })
-      );
+      );      
       setAmount("");
       setIsLoading(false);
       toast.success("Withdrawal request submitted for admin approval.");
