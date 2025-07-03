@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   TextField,
@@ -11,6 +10,8 @@ import {
   IconButton,
   Divider,
   Chip,
+  CircularProgress,
+  useTheme,
 } from "@mui/material";
 import {
   Visibility,
@@ -23,42 +24,30 @@ import { useDispatch } from "react-redux";
 import { login } from "../../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { mockUsers } from "../../utils/data";
-import useRoleRedirect from "../../hooks/useRoleRedirect";
+import { useForm } from "react-hook-form";
+import ThemeToggleButton from "../../components/ThemeToggleButton";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const validateForm = () => {
-    const newErrors = {};
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [generalError, setGeneralError] = useState("");
 
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Please enter a valid email";
-    }
+  const {
+    register,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useForm();
 
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleLogin = async () => {
-    if (!validateForm()) return;
-
+  const onSubmit = async ({ email, password }) => {
     setIsLoading(true);
-
+    setGeneralError("");
 
     setTimeout(() => {
       const user = mockUsers.find(
@@ -69,241 +58,251 @@ const Login = () => {
         dispatch(login(user));
         navigate(user.role === "admin" ? "/admin/dashboard" : "/dashboard");
       } else {
-        setErrors({ general: "Invalid email or password" });
+        setGeneralError("Invalid email or password");
       }
 
       setIsLoading(false);
     }, 1000);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleLogin();
-    }
-  };
-
-  
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-pink-400 to-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-      </div>
-
-      <Container maxWidth="sm" className="relative z-10">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: isDark
+          ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
+          : "linear-gradient(to bottom right, #ebf4ff, #fce7f3)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        p: 2,
+        position: "relative",
+      }}
+    >
+      <ThemeToggleButton />
+      <Container maxWidth="sm" sx={{ position: "relative", zIndex: 1 }}>
         <Paper
           elevation={0}
-          className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-2xl"
           sx={{
-            borderRadius: 4,
-            padding: { xs: 3, sm: 4 },
-            background: "rgba(255, 255, 255, 0.85)",
+            borderRadius: 2,
+            p: { xs: 3, sm: 4 },
+            backgroundColor: isDark
+              ? "rgba(30, 41, 59, 0.85)"
+              : "rgba(255, 255, 255, 0.85)",
             backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            border: `1px solid ${
+              isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+            }`,
+            boxShadow: isDark
+              ? "0 25px 50px -12px rgba(0,0,0,0.6)"
+              : "0 25px 50px -12px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Header */}
           <Box textAlign="center" mb={4}>
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-              <LoginOutlined className="text-white text-2xl" />
-            </div>
-
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                background: "linear-gradient(to right, #3b82f6, #8b5cf6)",
+                borderRadius: 3,
+                mx: "auto",
+                mb: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: 3,
+              }}
+            >
+              <LoginOutlined sx={{ color: "#fff", fontSize: 28 }} />
+            </Box>
             <Typography
               variant="h4"
-              className="font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
+              fontWeight="bold"
+              sx={{
+                background: "linear-gradient(to right, #1f2937, #374151)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
               gutterBottom
             >
               Welcome Back
             </Typography>
-
-            <Typography variant="body1" className="text-gray-600">
+            <Typography variant="body1" color="text.secondary">
               Sign in to your account to continue
             </Typography>
           </Box>
 
-          {/* Error Message */}
-          {errors.general && (
+          {generalError && (
             <Box mb={3}>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <Typography variant="body2" className="text-red-600">
-                  {errors.general}
-                </Typography>
-              </div>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  backgroundColor: "rgba(252, 165, 165, 0.2)",
+                  border: "1px solid rgba(239, 68, 68, 0.4)",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography color="error">{generalError}</Typography>
+              </Paper>
             </Box>
           )}
 
-          {/* Form */}
-          <Box component="form" noValidate>
-            {/* Email Field */}
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+            {/* Email */}
             <TextField
               fullWidth
               label="Email Address"
               type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (errors.email) setErrors({ ...errors, email: null });
-              }}
-              onKeyPress={handleKeyPress}
               error={!!errors.email}
-              helperText={errors.email}
+              helperText={errors.email?.message}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: "Invalid email address",
+                },
+              })}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Email className="text-gray-400" />
+                    <Email sx={{ color: "text.secondary" }} />
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                mb: 3,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  backgroundColor: "rgba(255, 255, 255, 0.8)",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  },
-                  "&.Mui-focused": {
-                    backgroundColor: "rgba(255, 255, 255, 1)",
-                  },
-                },
-              }}
+              sx={{ mb: 3 }}
             />
 
-            {/* Password Field */}
+            {/* Password */}
             <TextField
               fullWidth
               label="Password"
               type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) setErrors({ ...errors, password: null });
-              }}
-              onKeyPress={handleKeyPress}
               error={!!errors.password}
-              helperText={errors.password}
+              helperText={errors.password?.message}
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Minimum 6 characters required",
+                },
+              })}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Lock className="text-gray-400" />
+                    <Lock sx={{ color: "text.secondary" }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword((prev) => !prev)}
                       edge="end"
-                      className="text-gray-400 hover:text-gray-600"
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                mb: 3,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  backgroundColor: "rgba(255, 255, 255, 0.8)",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  },
-                  "&.Mui-focused": {
-                    backgroundColor: "rgba(255, 255, 255, 1)",
-                  },
-                },
-              }}
+              sx={{ mb: 3 }}
             />
 
-            {/* Forgot Password */}
             <Box textAlign="right" mb={3}>
               <Typography
                 variant="body2"
-                className="text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
+                sx={{
+                  color: "primary.main",
+                  cursor: "pointer",
+                  "&:hover": { textDecoration: "underline" },
+                }}
               >
                 Forgot your password?
               </Typography>
             </Box>
 
-            {/* Login Button */}
             <Button
               fullWidth
               variant="contained"
-              onClick={handleLogin}
+              type="submit"
               disabled={isLoading}
-              className="h-12 rounded-xl font-semibold text-base transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
               sx={{
+                height: 48,
                 mb: 3,
+                textTransform: "none",
+                borderRadius: 2,
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 "&:hover": {
                   background:
                     "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
                 },
-                "&:disabled": {
-                  background: "rgba(156, 163, 175, 0.5)",
-                },
-                textTransform: "none",
               }}
             >
               {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Signing in...</span>
-                </div>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <CircularProgress size={20} color="inherit" />
+                  Signing in...
+                </Box>
               ) : (
                 "Sign In"
               )}
             </Button>
 
-            {/* Divider */}
-            <Box my={3}>
-              <Divider>
-                <Chip
-                  label="or continue with"
-                  size="small"
-                  className="bg-gray-50 text-gray-500"
-                />
-              </Divider>
-            </Box>
+            <Divider sx={{ my: 3 }}>
+              <Chip
+                label="or continue with"
+                size="small"
+                sx={{
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(0,0,0,0.05)",
+                  color: "text.secondary",
+                }}
+              />
+            </Divider>
 
-            {/* Social Login */}
             <Button
               fullWidth
               variant="outlined"
-              className="h-12 rounded-xl font-medium text-base border-gray-300 text-gray-700 hover:bg-gray-50 transition-all duration-200"
               sx={{
+                height: 48,
                 mb: 3,
                 textTransform: "none",
-                borderColor: "rgba(156, 163, 175, 0.3)",
+                borderRadius: 2,
+                borderColor: "divider",
+                color: "text.primary",
                 "&:hover": {
-                  borderColor: "rgba(156, 163, 175, 0.5)",
-                  backgroundColor: "rgba(249, 250, 251, 0.8)",
+                  backgroundColor: "action.hover",
                 },
               }}
             >
-              <div className="flex items-center space-x-2">
-                <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-red-500 rounded"></div>
-                <span>Continue with Google</span>
-              </div>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: "linear-gradient(to right, #3b82f6, #ef4444)",
+                  }}
+                />
+                Continue with Google
+              </Box>
             </Button>
 
-            {/* Sign Up Link */}
             <Box textAlign="center">
-              <Typography variant="body2" className="text-gray-600">
-                Don't have an account?{" "}
-                <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium transition-colors">
-                  <Link to="/register"> Sign up here</Link>
-                </span>
+              <Typography variant="body2" color="text.secondary">
+                Don&apos;t have an account?{" "}
+                <Link
+                  to="/register"
+                  style={{ color: theme.palette.primary.main, fontWeight: 500 }}
+                >
+                  Sign up here
+                </Link>
               </Typography>
             </Box>
           </Box>
         </Paper>
       </Container>
-    </div>
+    </Box>
   );
 };
 

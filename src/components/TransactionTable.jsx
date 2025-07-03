@@ -9,6 +9,8 @@ import {
   TableRow,
   Typography,
   Chip,
+  useTheme,
+  Box,
 } from "@mui/material";
 import {
   TrendingUp,
@@ -18,6 +20,9 @@ import {
 } from "@mui/icons-material";
 
 const TransactionTable = ({ txns = [], userId = "" }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
@@ -46,16 +51,22 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
       component={Paper}
       elevation={0}
       sx={{
-        borderRadius: 3,
-        background: "rgba(255, 255, 255, 0.8)",
+        borderRadius: 2,
+        backgroundColor: isDarkMode
+          ? "rgba(18, 18, 18, 0.85)"
+          : "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(10px)",
-        border: "1px solid rgba(255, 255, 255, 0.3)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-        maxHeight: 400,
+        border: `1px solid ${
+          isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.3)"
+        }`,
+        boxShadow: isDarkMode
+          ? "0 8px 32px rgba(0, 0, 0, 0.5)"
+          : "0 8px 32px rgba(0, 0, 0, 0.1)",
+        maxHeight: 600,
         overflowY: "auto",
       }}
     >
-      <Table>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             {[
@@ -71,8 +82,10 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
                 key={head}
                 sx={{
                   fontWeight: "bold",
-                  backgroundColor: "rgba(99, 102, 241, 0.1)",
-                  color: "#374151",
+                       backgroundColor: isDarkMode
+                                      ? theme.palette.background.paper // solid dark background
+                                      : theme.palette.primary.light, // solid light background
+                  color: theme.palette.text.primary,
                 }}
               >
                 {head}
@@ -85,7 +98,7 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
           {txns.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                <Typography variant="body1" className="text-gray-500">
+                <Typography variant="body1" color="text.secondary">
                   No transactions found
                 </Typography>
               </TableCell>
@@ -93,65 +106,82 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
           ) : (
             txns.map((txn) => {
               const { type: direction, icon } = getTransactionType(txn);
+              const isSent = direction === "sent";
+              const amountColor = isSent ? "error.main" : "success.main";
+
               return (
                 <TableRow
                   key={txn.id}
                   sx={{
                     "&:hover": {
-                      backgroundColor: "rgba(99, 102, 241, 0.05)",
+                      backgroundColor: isDarkMode
+                        ? "rgba(255,255,255,0.03)"
+                        : "rgba(99, 102, 241, 0.05)",
                     },
                   }}
                 >
                   <TableCell>
-                    <Typography variant="body2" className="font-mono text-sm">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        fontSize: "0.875rem",
+                      }}
+                    >
                       #{txn.id}
                     </Typography>
                   </TableCell>
+
                   <TableCell>
-                    <div className="flex items-center space-x-2">
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       {icon}
-                      <span
-                        className={`capitalize ${
-                          direction === "sent"
-                            ? "text-red-600"
-                            : "text-green-600"
-                        }`}
+                      <Typography
+                        sx={{
+                          textTransform: "capitalize",
+                          color: amountColor,
+                          fontWeight: 500,
+                        }}
                       >
                         {direction}
-                      </span>
-                    </div>
+                      </Typography>
+                    </Box>
                   </TableCell>
+
                   <TableCell>{txn.from}</TableCell>
                   <TableCell>{txn.to}</TableCell>
+
                   <TableCell>
                     <Typography
                       variant="body2"
-                      className={`font-semibold ${
-                        direction === "sent" ? "text-red-600" : "text-green-600"
-                      }`}
+                      sx={{
+                        fontWeight: "bold",
+                        color: amountColor,
+                      }}
                     >
-                      {direction === "sent" ? "-" : "+"}₹{txn.amount.toFixed(2)}
+                      {isSent ? "-" : "+"}₹{txn.amount.toFixed(2)}
                     </Typography>
                   </TableCell>
+
                   <TableCell>
                     <Chip
                       label={txn.type}
                       size="small"
                       variant="outlined"
-                      className="capitalize"
                       sx={{
+                        textTransform: "capitalize",
                         borderColor: "rgba(99, 102, 241, 0.3)",
                         color: "#6366f1",
                         backgroundColor: "rgba(99, 102, 241, 0.1)",
                       }}
                     />
                   </TableCell>
+
                   <TableCell>
                     <Chip
                       label={txn.status}
                       size="small"
                       color={getStatusColor(txn.status)}
-                      className="capitalize"
+                      sx={{ textTransform: "capitalize" }}
                     />
                   </TableCell>
                 </TableRow>

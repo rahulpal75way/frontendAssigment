@@ -1,10 +1,13 @@
-// TxnHistory.jsx
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import HeaderSection from "../../components/HeaderSection";
 import TransactionTable from "../../components/TransactionTable";
+import { Box, useTheme } from "@mui/material";
 
 const TxnHistory = () => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const user = useSelector((state) => state.auth.user);
   const { txns } = useSelector((state) => state.txns);
 
@@ -14,17 +17,69 @@ const TxnHistory = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-pink-400 to-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-      </div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: theme.palette.background.default,
+        p: 2,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Background Gradient Bubbles */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "-10rem",
+            right: "-10rem",
+            width: "20rem",
+            height: "20rem",
+            background:
+              "linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+            animation: "pulse 4s ease-in-out infinite",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "-10rem",
+            left: "-10rem",
+            width: "20rem",
+            height: "20rem",
+            background:
+              "linear-gradient(135deg, rgba(236,72,153,0.2), rgba(251,191,36,0.2))",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+            animation: "pulse 4s ease-in-out infinite",
+            animationDelay: "1s",
+          }}
+        />
+      </Box>
 
-      <div className="relative z-10 max-w-6xl mx-auto">
+      {/* Main Content */}
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: "96rem",
+          mx: "auto",
+        }}
+      >
         <HeaderSection />
         <TransactionTable txns={filtered} userId={user.id} />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

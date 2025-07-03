@@ -1,19 +1,10 @@
 import React, { useMemo, useCallback, lazy, Suspense } from "react";
 import {
   Container,
-  Paper,
   Typography,
   Box,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Avatar,
+  useTheme,
+  CircularProgress,
 } from "@mui/material";
 import {
   TrendingUp,
@@ -33,6 +24,9 @@ const CommissionSummaryCard = lazy(() =>
 );
 
 const Commissions = () => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const { commissions } = useSelector((state) => state.txns);
 
   const total = useMemo(
@@ -50,15 +44,15 @@ const Commissions = () => {
   const getTypeIcon = useCallback((type) => {
     switch (type) {
       case "deposit":
-        return <GetApp className="text-green-500" />;
+        return <GetApp color="success" />;
       case "withdrawal":
-        return <CallMade className="text-red-500" />;
+        return <CallMade color="error" />;
       case "international":
-        return <Public className="text-blue-500" />;
+        return <Public color="primary" />;
       case "local":
-        return <LocationOn className="text-purple-500" />;
+        return <LocationOn color="secondary" />;
       default:
-        return <AccountBalance className="text-gray-500" />;
+        return <AccountBalance color="disabled" />;
     }
   }, []);
 
@@ -82,41 +76,92 @@ const Commissions = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-pink-400 to-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-      </div>
-
-      <Container maxWidth="lg" className="relative z-10">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        py: 4,
+        px: 2,
+        position: "relative",
+        background: isDarkMode
+          ? "linear-gradient(to bottom right, #121212, #1e1e1e)"
+          : "linear-gradient(to bottom right, #ebf4ff, #fce7f3)",
+        "&::before, &::after": {
+          content: '""',
+          position: "absolute",
+          borderRadius: "50%",
+          filter: "blur(100px)",
+          opacity: 0.2,
+          zIndex: 0,
+        },
+        "&::before": {
+          top: -120,
+          right: -120,
+          width: 320,
+          height: 320,
+          background: "linear-gradient(to right, #3b82f6, #8b5cf6)",
+        },
+        "&::after": {
+          bottom: -120,
+          left: -120,
+          width: 320,
+          height: 320,
+          background: "linear-gradient(to right, #ec4899, #facc15)",
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Box mb={4}>
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <TrendingUp className="text-white text-xl" />
-            </div>
-            <div>
+          <Box display="flex" alignItems="center" gap={2} mb={2}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 2,
+                background: "linear-gradient(to right, #3b82f6, #8b5cf6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: 3,
+              }}
+            >
+              <TrendingUp sx={{ color: "#fff" }} />
+            </Box>
+            <Box>
               <Typography
                 variant="h4"
-                className="font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
+                fontWeight="bold"
+                sx={{
+                  background: isDarkMode
+                    ? "linear-gradient(to right, #f3f4f6, #d1d5db)"
+                    : "linear-gradient(to right, #1f2937, #374151)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
               >
                 Commission Report
               </Typography>
-              <Typography variant="body1" className="text-gray-600">
+              <Typography variant="body2" color="text.secondary">
                 Overview of all commission transactions
               </Typography>
-            </div>
-          </div>
+            </Box>
+          </Box>
         </Box>
 
         <Box
           mb={4}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+          display="grid"
+          gridTemplateColumns={{
+            xs: "1fr",
+            sm: "1fr 1fr",
+            lg: "repeat(4, 1fr)",
+          }}
+          gap={3}
         >
-          <Suspense fallback={<div>Loading summary...</div>}>
+          <Suspense fallback={<CircularProgress sx={{ mx: "auto", my: 2 }} />}>
             <CommissionSummaryCard
               label="Total Commission"
               value={`$${total.toFixed(2)}`}
-              icon={<TrendingUp className="text-white" />}
+              icon={<TrendingUp sx={{ color: "#fff" }} />}
               gradientFrom="from-green-400"
               gradientTo="to-green-600"
             />
@@ -135,7 +180,7 @@ const Commissions = () => {
           </Suspense>
         </Box>
 
-        <Suspense fallback={<div>Loading table...</div>}>
+        <Suspense fallback={<CircularProgress sx={{ mx: "auto", my: 2 }} />}>
           <CommissionTable
             commissions={commissions}
             formatTxnId={formatTxnId}
@@ -145,7 +190,7 @@ const Commissions = () => {
           />
         </Suspense>
       </Container>
-    </div>
+    </Box>
   );
 };
 

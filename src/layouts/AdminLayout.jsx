@@ -33,6 +33,7 @@ import useAuth from "../hooks/useAuth";
 import { useDispatch } from "react-redux";
 import { logout } from "../features/auth/authSlice";
 import ErrorBoundary from "../components/ErrorBoundary";
+import ThemeToggleButton from "../components/ThemeToggleButton";
 
 const AdminLayout = () => {
   const user = useAuth();
@@ -40,6 +41,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isDarkMode = theme.palette.mode === "dark";
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -59,44 +61,74 @@ const AdminLayout = () => {
     },
   ];
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleProfileMenuOpen = (e) => setAnchorEl(e.currentTarget);
+  const handleProfileMenuClose = () => setAnchorEl(null);
   const handleLogout = () => {
     dispatch(logout());
-    setAnchorEl(null);
     handleProfileMenuClose();
-  };
-
-  const handleProfileMenuClose = () => {
-    setAnchorEl(null);
   };
 
   const isActive = (path) => location.pathname === path;
 
   const drawer = (
-    <div className="h-full mt-16 bg-gradient-to-br from-slate-50 to-indigo-50 overflow-y-auto">
-      <div className="p-4 border-b border-white/20 sticky top-0 bg-white/30 backdrop-blur-sm z-10">
-        <div className="flex items-center justify-between">
+    <Box
+      sx={{
+        height: "100%",
+        marginTop: "64px",
+        backgroundColor: isDarkMode
+          ? "rgba(18,18,18,0.95)"
+          : "rgba(248,250,252,0.95)",
+        backdropFilter: "blur(20px)",
+        overflowY: "auto",
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: `1px solid ${
+            isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+          }`,
+          backgroundColor: isDarkMode
+            ? "rgba(18,18,18,0.8)"
+            : "rgba(255,255,255,0.8)",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           {!sidebarCollapsed && (
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <AdminPanelSettings className="text-white" />
-              </div>
-              <div>
-                <Typography variant="h6" className="font-bold text-gray-800">
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "linear-gradient(to right, #6366f1, #8b5cf6)",
+                }}
+              >
+                <AdminPanelSettings sx={{ color: "white" }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" fontWeight="bold">
                   Admin Console
                 </Typography>
-                <Typography variant="caption" className="text-gray-500">
+                <Typography variant="caption" color="text.secondary">
                   Wallet Management
                 </Typography>
-              </div>
-            </div>
+              </Box>
+            </Box>
           )}
           {!isMobile && (
             <IconButton
@@ -104,70 +136,118 @@ const AdminLayout = () => {
               size="small"
             >
               <ChevronLeft
-                className={`transition-transform ${
-                  sidebarCollapsed ? "rotate-180" : ""
-                }`}
+                sx={{
+                  transform: sidebarCollapsed
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "transform 0.3s ease",
+                }}
               />
             </IconButton>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
+      {/* Profile */}
       {!sidebarCollapsed && (
-        <div className="p-4 border-b border-white/20">
-          <div className="flex items-center space-x-3 p-3 rounded-2xl bg-white/50 backdrop-blur-sm">
+        <Box
+          sx={{
+            p: 2,
+            borderBottom: `1px solid ${
+              isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+            }`,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              p: 1.5,
+              borderRadius: 2,
+              backgroundColor: isDarkMode
+                ? "rgba(255,255,255,0.05)"
+                : "rgba(255,255,255,0.7)",
+              backdropFilter: "blur(10px)",
+            }}
+          >
             <Avatar
-              className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600"
+              sx={{
+                width: 48,
+                height: 48,
+                background: "linear-gradient(to right, #6366f1, #8b5cf6)",
+              }}
               src={user.avatar}
             >
               {user.name?.charAt(0)}
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <Typography
-                variant="subtitle1"
-                className="font-semibold text-gray-800 truncate"
-              >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="subtitle1" fontWeight={600} noWrap>
                 {user.name}
               </Typography>
-              <Typography variant="caption" className="text-gray-500 truncate">
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {user.email}
               </Typography>
-            </div>
+            </Box>
             <Chip
               label="ADMIN"
               size="small"
-              className="bg-gradient-to-r from-red-400 to-pink-500 text-white text-xs"
+              sx={{
+                background: "linear-gradient(to right, #f43f5e, #ec4899)",
+                color: "white",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+              }}
             />
-          </div>
-        </div>
+          </Box>
+        </Box>
       )}
 
-      <List className="p-2 space-y-1">
+      {/* Navigation */}
+      <List sx={{ p: 1, "& .MuiListItem-root": { mb: 0.5 } }}>
         {navigationItems.map((item) => (
           <ListItem
             key={item.text}
             component={Link}
             to={item.path}
-            className={`rounded-xl transition-all duration-200 ${
-              isActive(item.path)
-                ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg transform scale-105"
-                : "text-gray-700 hover:bg-white/60 hover:scale-102"
-            }`}
             sx={{
-              mb: 1,
+              borderRadius: "12px",
               minHeight: 48,
               justifyContent: sidebarCollapsed ? "center" : "initial",
-              px: 2.5,
+              px: 2,
+              mx: 1,
+              ...(isActive(item.path)
+                ? {
+                    background: "linear-gradient(to right, #6366f1, #8b5cf6)",
+                    color: "white",
+                    boxShadow: "0 4px 12px rgba(99,102,241,0.3)",
+                    transform: "scale(1.02)",
+                    "& .MuiListItemIcon-root": { color: "white" },
+                    "& .MuiListItemText-primary": {
+                      color: "white",
+                      fontWeight: 600,
+                    },
+                  }
+                : {
+                    color: theme.palette.text.primary,
+                    "&:hover": {
+                      backgroundColor: isDarkMode
+                        ? "rgba(255,255,255,0.05)"
+                        : "rgba(0,0,0,0.05)",
+                      transform: "scale(1.01)",
+                    },
+                    "& .MuiListItemIcon-root": {
+                      color: theme.palette.text.secondary,
+                    },
+                  }),
             }}
           >
             <ListItemIcon
-              className={`${
-                isActive(item.path) ? "text-white" : "text-gray-600"
-              } transition-colors`}
               sx={{
                 minWidth: 0,
-                mr: sidebarCollapsed ? 0 : 3,
+                mr: sidebarCollapsed ? 0 : 2,
                 justifyContent: "center",
+                transition: "color 0.2s ease",
               }}
             >
               {item.icon}
@@ -184,24 +264,36 @@ const AdminLayout = () => {
           </ListItem>
         ))}
       </List>
-    </div>
+    </Box>
   );
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: theme.palette.background.default,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* AppBar */}
         <AppBar
           position="fixed"
           elevation={0}
           sx={{
             zIndex: theme.zIndex.drawer + 10,
-            backgroundColor: "rgba(255, 255, 255, 0.85)",
+            backgroundColor: isDarkMode
+              ? "rgba(18,18,18,0.9)"
+              : "rgba(255,255,255,0.9)",
             backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+            borderBottom: `1px solid ${
+              isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+            }`,
           }}
         >
-          <Toolbar className="justify-between">
-            <div className="flex items-center">
+          <Toolbar sx={{ justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
@@ -209,61 +301,79 @@ const AdminLayout = () => {
                 onClick={handleDrawerToggle}
                 sx={{ mr: 2, display: { md: "none" } }}
               >
-                <MenuIcon className="text-black" />
+                <MenuIcon />
               </IconButton>
-              <Typography variant="h6" className="font-semibold text-gray-800">
+              <Typography variant="h6" fontWeight={600}>
                 {navigationItems.find((item) => isActive(item.path))?.text ||
                   "Dashboard"}
               </Typography>
-            </div>
-            <div className="flex items-center space-x-3">
-              <IconButton className="text-gray-600 hover:bg-white/50">
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <ThemeToggleButton/>
+              <IconButton
+                sx={{
+                  color: theme.palette.text.secondary,
+                  "&:hover": {
+                    backgroundColor: isDarkMode
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,0,0,0.1)",
+                  },
+                }}
+              >
                 <Notifications />
               </IconButton>
-              <IconButton
-                onClick={handleProfileMenuOpen}
-                className="text-gray-600"
-              >
+              <IconButton onClick={handleProfileMenuOpen}>
                 <Avatar
-                  className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600"
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    background: "linear-gradient(to right, #6366f1, #8b5cf6)",
+                  }}
                   src={user.avatar}
                 >
                   {user.name?.charAt(0)}
                 </Avatar>
               </IconButton>
-            </div>
+            </Box>
           </Toolbar>
         </AppBar>
 
+        {/* Profile Menu */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleProfileMenuClose}
           PaperProps={{
             sx: {
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              backgroundColor: isDarkMode
+                ? "rgba(18,18,18,0.95)"
+                : "rgba(255,255,255,0.95)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              borderRadius: 2,
+              border: `1px solid ${
+                isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+              }`,
+              borderRadius: "12px",
               mt: 1,
               minWidth: 200,
             },
           }}
         >
-          <MenuItem className="hover:bg-white/50">
-            <AccountCircle className="mr-3 text-gray-600" />
+          <MenuItem onClick={handleProfileMenuClose}>
+            <AccountCircle sx={{ mr: 1.5 }} />
             Profile
           </MenuItem>
           <Divider />
           <MenuItem
             onClick={handleLogout}
-            className="hover:bg-red-50 text-red-600"
+            sx={{ color: "#ef4444", "&:hover": { backgroundColor: "#fee2e2" } }}
           >
-            <Logout className="mr-3" />
+            <Logout sx={{ mr: 1.5 }} />
             Logout
           </MenuItem>
         </Menu>
 
+        {/* Sidebar */}
         <Box
           component="nav"
           sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
@@ -276,26 +386,21 @@ const AdminLayout = () => {
             sx={{
               display: { xs: "block", md: "none" },
               "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
                 width: 280,
                 border: "none",
-                backgroundColor: "rgba(255, 255, 255, 0.85)",
-                backdropFilter: "blur(20px)",
               },
             }}
           >
             {drawer}
           </Drawer>
+
           <Drawer
             variant="permanent"
             sx={{
               display: { xs: "none", md: "block" },
               "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
                 width: drawerWidth,
                 border: "none",
-                backgroundColor: "rgba(255, 255, 255, 0.85)",
-                backdropFilter: "blur(20px)",
                 transition: "width 0.3s ease",
               },
             }}
@@ -305,20 +410,19 @@ const AdminLayout = () => {
           </Drawer>
         </Box>
 
+        {/* Main Content */}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
             width: { md: `calc(100% - ${drawerWidth}px)` },
             ml: { md: `${drawerWidth}px` },
             mt: 8,
-            transition: "margin 0.3s ease, width 0.3s ease",
           }}
         >
           <Outlet />
         </Box>
-      </div>
+      </Box>
     </ErrorBoundary>
   );
 };

@@ -1,23 +1,23 @@
 import React, { useState } from "react";
 import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  IconButton, 
-  Avatar, 
-  Menu, 
-  MenuItem, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
   ListItemText,
   Box,
   useTheme,
   useMediaQuery,
   Divider,
-  Chip
+  Chip,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -37,15 +37,15 @@ import useAuth from "../hooks/useAuth";
 import { useDispatch } from "react-redux";
 import { logout } from "../features/auth/authSlice";
 import ErrorBoundary from "../components/ErrorBoundary";
-
+import ThemeToggleButton from "../components/ThemeToggleButton";
 
 const UserLayout = () => {
   const user = useAuth();
   const location = useLocation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const dispatch = useDispatch()
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const dispatch = useDispatch();
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -70,117 +70,254 @@ const UserLayout = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logout());
     setAnchorEl(null);
-    handleProfileMenuClose()
+    handleProfileMenuClose();
   };
 
   const handleProfileMenuClose = () => {
     setAnchorEl(null);
   };
-  
 
   const isActive = (path) => location.pathname === path;
-
   const drawerWidth = sidebarCollapsed ? 70 : 280;
 
+  // Theme-aware styles
+  const isDarkMode = theme.palette.mode === "dark";
+
   const drawer = (
-    <div className="h-full mt-16 bg-gradient-to-br from-slate-50 to-blue-50 backdrop-blur-lg overflow-y-auto">
+    <Box
+      sx={{
+        height: "100%",
+        marginTop: "64px",
+        backgroundColor: isDarkMode
+          ? "rgba(18, 18, 18, 0.95)"
+          : "rgba(248, 250, 252, 0.95)",
+        backdropFilter: "blur(20px)",
+        overflowY: "auto",
+      }}
+    >
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-white/20 sticky top-0 bg-white/20 backdrop-blur-sm z-10">
-        <div className="flex items-center justify-between">
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: `1px solid ${
+            isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
+          }`,
+          position: "sticky",
+          top: 0,
+          backgroundColor: isDarkMode
+            ? "rgba(18, 18, 18, 0.8)"
+            : "rgba(255, 255, 255, 0.8)",
+          backdropFilter: "blur(10px)",
+          zIndex: 10,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           {!sidebarCollapsed && (
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Wallet className="text-white text-lg" />
-              </div>
-              <div>
-                <Typography variant="h6" className="font-bold text-gray-800">
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  background:
+                    "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                  borderRadius: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Wallet sx={{ color: "white", fontSize: "1.2rem" }} />
+              </Box>
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: "bold",
+                    color: theme.palette.text.primary,
+                    fontSize: "1.1rem",
+                  }}
+                >
                   WalletApp
                 </Typography>
-                <Typography variant="caption" className="text-gray-500">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                  }}
+                >
                   Digital Wallet
                 </Typography>
-              </div>
-            </div>
+              </Box>
+            </Box>
           )}
           {!isMobile && (
-            <IconButton 
+            <IconButton
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="text-gray-600 hover:bg-white/50"
+              sx={{
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.1)"
+                    : "rgba(0, 0, 0, 0.1)",
+                },
+              }}
               size="small"
             >
-              <ChevronLeft className={`transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
+              <ChevronLeft
+                sx={{
+                  transition: "transform 0.3s ease",
+                  transform: sidebarCollapsed
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                }}
+              />
             </IconButton>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Scrollable Content */}
-      <div className="pb-20">
+      <Box sx={{ pb: 10 }}>
         {/* User Profile Section */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-b border-white/20">
-            <div className="flex items-center space-x-3 p-3 rounded-2xl bg-white/50 backdrop-blur-sm">
-              <Avatar 
-                className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600"
+          <Box
+            sx={{
+              p: 2,
+              borderBottom: `1px solid ${
+                isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
+              }`,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                p: 1.5,
+                borderRadius: "16px",
+                backgroundColor: isDarkMode
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(255, 255, 255, 0.7)",
+                backdropFilter: "blur(10px)",
+              }}
+            >
+              <Avatar
+                sx={{
+                  width: 48,
+                  height: 48,
+                  background:
+                    "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                }}
                 src={user.avatar}
               >
                 {user.name?.charAt(0)}
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <Typography variant="subtitle1" className="font-semibold text-gray-800 truncate">
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {user.name}
                 </Typography>
-                <Typography variant="caption" className="text-gray-500 truncate">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {user.email}
                 </Typography>
-              </div>
-              <Chip 
-                label="PRO" 
-                size="small" 
-                className="bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs"
+              </Box>
+              <Chip
+                label="PRO"
+                size="small"
+                sx={{
+                  background:
+                    "linear-gradient(135deg, #10b981 0%, #3b82f6 100%)",
+                  color: "white",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                }}
               />
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
 
         {/* Navigation */}
-        <List className="p-2 space-y-1">
+        <List sx={{ p: 1, "& .MuiListItem-root": { mb: 0.5 } }}>
           {navigationItems.map((item) => (
             <ListItem
               key={item.text}
               component={Link}
               to={item.path}
-              className={`rounded-xl transition-all duration-200 ${
-                isActive(item.path)
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-700 hover:bg-white/60 hover:scale-102'
-              }`}
               sx={{
-                mb: 1,
+                borderRadius: "12px",
+                transition: "all 0.2s ease",
                 minHeight: 48,
-                justifyContent: sidebarCollapsed ? 'center' : 'initial',
-                px: 2.5,
+                justifyContent: sidebarCollapsed ? "center" : "initial",
+                px: 2,
+                mx: 1,
+                ...(isActive(item.path)
+                  ? {
+                      background:
+                        "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                      color: "white",
+                      boxShadow: "0 4px 12px rgba(59, 130, 246, 0.3)",
+                      transform: "scale(1.02)",
+                      "& .MuiListItemIcon-root": {
+                        color: "white",
+                      },
+                      "& .MuiListItemText-primary": {
+                        color: "white",
+                        fontWeight: 600,
+                      },
+                    }
+                  : {
+                      color: theme.palette.text.primary,
+                      "&:hover": {
+                        backgroundColor: isDarkMode
+                          ? "rgba(255, 255, 255, 0.1)"
+                          : "rgba(0, 0, 0, 0.05)",
+                        transform: "scale(1.01)",
+                      },
+                      "& .MuiListItemIcon-root": {
+                        color: theme.palette.text.secondary,
+                      },
+                    }),
               }}
             >
               <ListItemIcon
-                className={`${
-                  isActive(item.path) ? 'text-white' : 'text-gray-600'
-                } transition-colors`}
                 sx={{
                   minWidth: 0,
-                  mr: sidebarCollapsed ? 0 : 3,
-                  justifyContent: 'center',
+                  mr: sidebarCollapsed ? 0 : 2,
+                  justifyContent: "center",
+                  transition: "color 0.2s ease",
                 }}
               >
                 {item.icon}
               </ListItemIcon>
               {!sidebarCollapsed && (
-                <ListItemText 
+                <ListItemText
                   primary={item.text}
                   primaryTypographyProps={{
-                    fontSize: '0.95rem',
+                    fontSize: "0.95rem",
                     fontWeight: isActive(item.path) ? 600 : 500,
                   }}
                 />
@@ -188,19 +325,62 @@ const UserLayout = () => {
             </ListItem>
           ))}
         </List>
-      </div>
-      
-    </div>
+      </Box>
+    </Box>
   );
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: theme.palette.background.default,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
         {/* Background decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
-          <div className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-r from-pink-400 to-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse delay-1000"></div>
-        </div>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            overflow: "hidden",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "5rem",
+              right: "5rem",
+              width: "18rem",
+              height: "18rem",
+              background: isDarkMode
+                ? "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)"
+                : "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)",
+              borderRadius: "50%",
+              filter: "blur(40px)",
+              animation: "pulse 4s ease-in-out infinite",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "5rem",
+              left: "5rem",
+              width: "18rem",
+              height: "18rem",
+              background: isDarkMode
+                ? "linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)"
+                : "linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)",
+              borderRadius: "50%",
+              filter: "blur(40px)",
+              animation: "pulse 4s ease-in-out infinite",
+              animationDelay: "1s",
+            }}
+          />
+        </Box>
 
         {/* Top Navigation */}
         <AppBar
@@ -208,14 +388,18 @@ const UserLayout = () => {
           elevation={0}
           sx={{
             zIndex: theme.zIndex.drawer + 10,
-            backgroundColor: "rgba(255, 255, 255, 0.85)",
+            backgroundColor: isDarkMode
+              ? "rgba(18, 18, 18, 0.9)"
+              : "rgba(255, 255, 255, 0.9)",
             backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "text.primary",
+            borderBottom: `1px solid ${
+              isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
+            }`,
+            color: theme.palette.text.primary,
           }}
         >
-          <Toolbar className="justify-between">
-            <div className="flex items-center">
+          <Toolbar sx={{ justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
@@ -225,28 +409,49 @@ const UserLayout = () => {
               >
                 <MenuIcon />
               </IconButton>
-              <Typography variant="h6" className="font-semibold text-gray-800">
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                }}
+              >
                 {navigationItems.find((item) => isActive(item.path))?.text ||
                   "Dashboard"}
               </Typography>
-            </div>
+            </Box>
 
-            <div className="flex items-center space-x-3">
-              <IconButton className="text-gray-600 hover:bg-white/50">
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <ThemeToggleButton />
+              <IconButton
+                sx={{
+                  color: theme.palette.text.secondary,
+                  "&:hover": {
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(0, 0, 0, 0.1)",
+                  },
+                }}
+              >
                 <Notifications />
               </IconButton>
               <IconButton
                 onClick={handleProfileMenuOpen}
-                className="text-gray-600"
+                sx={{ color: theme.palette.text.secondary }}
               >
                 <Avatar
-                  className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600"
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    background:
+                      "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                  }}
                   src={user.avatar}
                 >
                   {user.name?.charAt(0)}
                 </Avatar>
               </IconButton>
-            </div>
+            </Box>
           </Toolbar>
         </AppBar>
 
@@ -257,27 +462,52 @@ const UserLayout = () => {
           onClose={handleProfileMenuClose}
           PaperProps={{
             sx: {
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              backgroundColor: isDarkMode
+                ? "rgba(18, 18, 18, 0.95)"
+                : "rgba(255, 255, 255, 0.95)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              borderRadius: 2,
+              border: `1px solid ${
+                isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
+              }`,
+              borderRadius: "12px",
               mt: 1,
               minWidth: 200,
             },
           }}
         >
-          <MenuItem className="hover:bg-white/50">
-            <AccountCircle className="mr-3 text-gray-600" />
-            Profile
+          <MenuItem
+            sx={{
+              "&:hover": {
+                backgroundColor: isDarkMode
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.05)",
+              },
+            }}
+          >
+            <AccountCircle
+              sx={{ mr: 1.5, color: theme.palette.text.secondary }}
+            />
+            <Typography sx={{ color: theme.palette.text.primary }}>
+              Profile
+            </Typography>
           </MenuItem>
-
-          <Divider />
+          <Divider
+            sx={{
+              borderColor: isDarkMode
+                ? "rgba(255, 255, 255, 0.1)"
+                : "rgba(0, 0, 0, 0.1)",
+            }}
+          />
           <MenuItem
             onClick={handleLogout}
-            className="hover:bg-red-50 text-red-600"
+            sx={{
+              "&:hover": {
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+              },
+            }}
           >
-            <Logout className="mr-3" />
-            Logout
+            <Logout sx={{ mr: 1.5, color: "#ef4444" }} />
+            <Typography sx={{ color: "#ef4444" }}>Logout</Typography>
           </MenuItem>
         </Menu>
 
@@ -286,6 +516,7 @@ const UserLayout = () => {
           component="nav"
           sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
         >
+          {/* Mobile Drawer */}
           <Drawer
             variant="temporary"
             open={isMobile ? mobileOpen : true}
@@ -299,14 +530,18 @@ const UserLayout = () => {
                 boxSizing: "border-box",
                 width: 280,
                 border: "none",
-                backgroundColor: "rgba(255, 255, 255, 0.85)",
+                backgroundColor: isDarkMode
+                  ? "rgba(18, 18, 18, 0.95)"
+                  : "rgba(255, 255, 255, 0.95)",
                 backdropFilter: "blur(20px)",
                 overflowY: "auto",
                 "&::-webkit-scrollbar": {
                   width: "6px",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "rgba(0, 0, 0, 0.2)",
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.3)"
+                    : "rgba(0, 0, 0, 0.3)",
                   borderRadius: "3px",
                 },
                 "&::-webkit-scrollbar-track": {
@@ -317,6 +552,8 @@ const UserLayout = () => {
           >
             {drawer}
           </Drawer>
+
+          {/* Desktop Drawer */}
           <Drawer
             variant="permanent"
             sx={{
@@ -325,7 +562,9 @@ const UserLayout = () => {
                 boxSizing: "border-box",
                 width: drawerWidth,
                 border: "none",
-                backgroundColor: "rgba(255, 255, 255, 0.85)",
+                backgroundColor: isDarkMode
+                  ? "rgba(18, 18, 18, 0.95)"
+                  : "rgba(255, 255, 255, 0.95)",
                 backdropFilter: "blur(20px)",
                 transition: "width 0.3s ease",
                 overflowY: "auto",
@@ -333,7 +572,9 @@ const UserLayout = () => {
                   width: "6px",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "rgba(0, 0, 0, 0.2)",
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.3)"
+                    : "rgba(0, 0, 0, 0.3)",
                   borderRadius: "3px",
                 },
                 "&::-webkit-scrollbar-track": {
@@ -352,16 +593,17 @@ const UserLayout = () => {
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
             width: { md: `calc(100% - ${drawerWidth}px)` },
             ml: { md: `${drawerWidth}px` },
             mt: 8,
             transition: "margin 0.3s ease, width 0.3s ease",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <Outlet />
         </Box>
-      </div>
+      </Box>
     </ErrorBoundary>
   );
 };

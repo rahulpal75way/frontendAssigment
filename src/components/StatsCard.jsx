@@ -7,7 +7,7 @@ const StatsCard = ({ stat }) => {
       elevation={0}
       className="relative overflow-hidden backdrop-blur-lg bg-white/70 border border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105"
       sx={{
-        borderRadius: 3,
+        borderRadius: 2,
         background: "rgba(255, 255, 255, 0.8)",
         backdropFilter: "blur(20px)",
         border: "1px solid rgba(255, 255, 255, 0.2)",

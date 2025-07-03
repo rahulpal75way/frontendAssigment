@@ -45,7 +45,7 @@ const Error = () => {
           elevation={0}
           className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-2xl"
           sx={{
-            borderRadius: 4,
+            borderRadius: 2,
             padding: { xs: 4, sm: 6 },
             background: "rgba(255, 255, 255, 0.85)",
             backdropFilter: "blur(20px)",

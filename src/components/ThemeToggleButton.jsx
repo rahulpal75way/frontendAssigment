@@ -8,7 +8,7 @@ const ThemeToggleButton = () => {
 
   const buttonStyle = {
     position: "fixed",
-    top: "20px",
+    top: "70px",
     right: "20px",
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,

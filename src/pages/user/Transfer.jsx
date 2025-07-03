@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { initiateTransfer } from "../../features/transaction/txnSlice";
@@ -10,6 +9,7 @@ import {
   Box,
   Paper,
   InputAdornment,
+  useTheme,
 } from "@mui/material";
 import {
   AccountBalanceWallet,
@@ -24,13 +24,20 @@ import { mockUsers } from "../../utils/data";
 const Transfer = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const users = useMemo(()=> mockUsers.filter((u)=> u.id !== user.id && u.role !== "admin"), [user.id])
+  const theme = useTheme();
+  const users = useMemo(
+    () => mockUsers.filter((u) => u.id !== user.id && u.role !== "admin"),
+    [user.id]
+  );
 
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("local");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  // Theme-aware styles
+  const isDarkMode = theme.palette.mode === "dark";
 
   const validateForm = () => {
     const newErrors = {};
@@ -54,7 +61,6 @@ const Transfer = () => {
 
     setIsLoading(true);
 
-
     setTimeout(() => {
       dispatch(
         initiateTransfer({
@@ -73,41 +79,126 @@ const Transfer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: theme.palette.background.default,
+        p: 2,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-pink-400 to-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-      </div>
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "-10rem",
+            right: "-10rem",
+            width: "20rem",
+            height: "20rem",
+            background: isDarkMode
+              ? "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)"
+              : "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+            animation: "pulse 4s ease-in-out infinite",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "-10rem",
+            left: "-10rem",
+            width: "20rem",
+            height: "20rem",
+            background: isDarkMode
+              ? "linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%)"
+              : "linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%)",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+            animation: "pulse 4s ease-in-out infinite",
+            animationDelay: "1s",
+          }}
+        />
+      </Box>
 
-      <div className="relative z-10 max-w-2xl mx-auto">
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: "48rem",
+          mx: "auto",
+        }}
+      >
         <Paper
           elevation={0}
-          className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-2xl"
           sx={{
-            borderRadius: 4,
+            borderRadius: 2,
             padding: { xs: 3, sm: 4 },
-            background: "rgba(255, 255, 255, 0.85)",
+            backgroundColor: isDarkMode
+              ? "rgba(18, 18, 18, 0.85)"
+              : "rgba(255, 255, 255, 0.85)",
             backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            border: `1px solid ${
+              isDarkMode
+                ? "rgba(255, 255, 255, 0.1)"
+                : "rgba(255, 255, 255, 0.2)"
+            }`,
+            boxShadow: isDarkMode
+              ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+              : "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           }}
         >
           {/* Header */}
           <Box textAlign="center" mb={4}>
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-              <SwapHoriz className="text-white text-2xl" />
-            </div>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                borderRadius: "16px",
+                mx: "auto",
+                mb: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.4)",
+              }}
+            >
+              <SwapHoriz sx={{ color: "white", fontSize: "2rem" }} />
+            </Box>
 
             <Typography
               variant="h4"
-              className="font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
-              gutterBottom
+              sx={{
+                fontWeight: "bold",
+                background: isDarkMode
+                  ? "linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%)"
+                  : "linear-gradient(135deg, #1f2937 0%, #4b5563 100%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+                mb: 1,
+              }}
             >
               Transfer Funds
             </Typography>
 
-            <Typography variant="body1" className="text-gray-600">
+            <Typography
+              variant="body1"
+              sx={{
+                color: theme.palette.text.secondary,
+              }}
+            >
               Send money to another user securely
             </Typography>
           </Box>
@@ -129,7 +220,7 @@ const Transfer = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Person className="text-gray-400" />
+                    <Person sx={{ color: theme.palette.text.secondary }} />
                   </InputAdornment>
                 ),
               }}
@@ -137,18 +228,30 @@ const Transfer = () => {
                 mb: 3,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(255, 255, 255, 0.8)",
                   "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(255, 255, 255, 0.9)",
                   },
                   "&.Mui-focused": {
-                    backgroundColor: "rgba(255, 255, 255, 1)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(255, 255, 255, 1)",
                   },
+                },
+                "& .MuiInputLabel-root": {
+                  color: theme.palette.text.secondary,
+                },
+                "& .MuiOutlinedInput-input": {
+                  color: theme.palette.text.primary,
                 },
               }}
             >
               {users
-                .filter((u) => u.role !== "admin") 
+                .filter((u) => u.role !== "admin")
                 .map((u) => (
                   <MenuItem key={u.id} value={u.id}>
                     {u.name} ({u.email})
@@ -171,7 +274,7 @@ const Transfer = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <AttachMoney className="text-gray-400" />
+                    <AttachMoney sx={{ color: theme.palette.text.secondary }} />
                   </InputAdornment>
                 ),
               }}
@@ -179,13 +282,25 @@ const Transfer = () => {
                 mb: 3,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(255, 255, 255, 0.8)",
                   "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(255, 255, 255, 0.9)",
                   },
                   "&.Mui-focused": {
-                    backgroundColor: "rgba(255, 255, 255, 1)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(255, 255, 255, 1)",
                   },
+                },
+                "& .MuiInputLabel-root": {
+                  color: theme.palette.text.secondary,
+                },
+                "& .MuiOutlinedInput-input": {
+                  color: theme.palette.text.primary,
                 },
               }}
             />
@@ -201,9 +316,11 @@ const Transfer = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     {type === "local" ? (
-                      <AccountBalanceWallet className="text-gray-400" />
+                      <AccountBalanceWallet
+                        sx={{ color: theme.palette.text.secondary }}
+                      />
                     ) : (
-                      <Public className="text-gray-400" />
+                      <Public sx={{ color: theme.palette.text.secondary }} />
                     )}
                   </InputAdornment>
                 ),
@@ -212,13 +329,25 @@ const Transfer = () => {
                 mb: 4,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(255, 255, 255, 0.8)",
                   "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(255, 255, 255, 0.9)",
                   },
                   "&.Mui-focused": {
-                    backgroundColor: "rgba(255, 255, 255, 1)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(255, 255, 255, 1)",
                   },
+                },
+                "& .MuiInputLabel-root": {
+                  color: theme.palette.text.secondary,
+                },
+                "& .MuiOutlinedInput-input": {
+                  color: theme.palette.text.primary,
                 },
               }}
             >
@@ -232,32 +361,54 @@ const Transfer = () => {
               variant="contained"
               onClick={handleSubmit}
               disabled={isLoading}
-              className="h-12 rounded-xl font-semibold text-base transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
               sx={{
+                height: 48,
+                borderRadius: 3,
+                fontWeight: 600,
+                fontSize: "1rem",
+                transition: "all 0.2s ease",
                 background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 "&:hover": {
                   background:
                     "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                  transform: "scale(1.02)",
+                  boxShadow: "0 10px 25px -5px rgba(102, 126, 234, 0.4)",
                 },
                 "&:disabled": {
-                  background: "rgba(156, 163, 175, 0.5)",
+                  background: isDarkMode
+                    ? "rgba(156, 163, 175, 0.3)"
+                    : "rgba(156, 163, 175, 0.5)",
+                  transform: "none",
                 },
                 textTransform: "none",
               }}
             >
               {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Processing...</span>
-                </div>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 20,
+                      height: 20,
+                      border: "2px solid white",
+                      borderTop: "2px solid transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                      "@keyframes spin": {
+                        "0%": { transform: "rotate(0deg)" },
+                        "100%": { transform: "rotate(360deg)" },
+                      },
+                    }}
+                  />
+                  <Typography>Processing...</Typography>
+                </Box>
               ) : (
                 "Submit Transfer"
               )}
             </Button>
           </Box>
         </Paper>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

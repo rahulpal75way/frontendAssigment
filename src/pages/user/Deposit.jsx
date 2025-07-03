@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { handleRequestDeposit, requestDeposit } from "../../features/wallet/walletSlice";
+import { handleRequestDeposit } from "../../features/wallet/walletSlice";
 import {
   TextField,
   Button,
@@ -9,6 +8,7 @@ import {
   Box,
   Paper,
   InputAdornment,
+  useTheme,
 } from "@mui/material";
 import { AccountBalanceWallet, AttachMoney } from "@mui/icons-material";
 import toast from "react-hot-toast";
@@ -16,6 +16,9 @@ import toast from "react-hot-toast";
 const Deposit = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const [amount, setAmount] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +41,6 @@ const Deposit = () => {
 
     setIsLoading(true);
 
-
     setTimeout(() => {
       dispatch(
         handleRequestDeposit({
@@ -53,41 +55,114 @@ const Deposit = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-indigo-50 to-blue-50 p-4">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: theme.palette.background.default,
+        p: 2,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* Decorative background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-green-400 to-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-yellow-400 to-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-      </div>
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "-10rem",
+            right: "-10rem",
+            width: "20rem",
+            height: "20rem",
+            background: isDarkMode
+              ? "linear-gradient(135deg, rgba(72, 187, 120, 0.2), rgba(66, 153, 225, 0.2))"
+              : "linear-gradient(135deg, rgba(72, 187, 120, 0.2), rgba(66, 153, 225, 0.2))",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+            animation: "pulse 4s ease-in-out infinite",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "-10rem",
+            left: "-10rem",
+            width: "20rem",
+            height: "20rem",
+            background: isDarkMode
+              ? "linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(236, 72, 153, 0.2))"
+              : "linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(236, 72, 153, 0.2))",
+            borderRadius: "50%",
+            filter: "blur(40px)",
+            animation: "pulse 4s ease-in-out infinite",
+            animationDelay: "1s",
+          }}
+        />
+      </Box>
 
-      <div className="relative z-10 max-w-md mx-auto">
+      <Box sx={{ position: "relative", zIndex: 1, maxWidth: 480, mx: "auto" }}>
         <Paper
           elevation={0}
-          className="backdrop-blur-lg bg-white/70 border border-white/20 shadow-2xl"
           sx={{
-            borderRadius: 4,
+            borderRadius: 2,
             padding: { xs: 3, sm: 4 },
-            background: "rgba(255, 255, 255, 0.85)",
+            backgroundColor: isDarkMode
+              ? "rgba(18, 18, 18, 0.85)"
+              : "rgba(255, 255, 255, 0.85)",
             backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            border: `1px solid ${
+              isDarkMode
+                ? "rgba(255, 255, 255, 0.1)"
+                : "rgba(255, 255, 255, 0.2)"
+            }`,
+            boxShadow: isDarkMode
+              ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+              : "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           }}
         >
           {/* Header */}
           <Box textAlign="center" mb={4}>
-            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-              <AccountBalanceWallet className="text-white text-2xl" />
-            </div>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                background: "linear-gradient(135deg, #38b2ac 0%, #3182ce 100%)",
+                borderRadius: "16px",
+                mx: "auto",
+                mb: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 10px 25px -5px rgba(56, 178, 172, 0.4)",
+              }}
+            >
+              <AccountBalanceWallet sx={{ color: "white", fontSize: 32 }} />
+            </Box>
 
             <Typography
               variant="h4"
-              className="font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
+              sx={{
+                fontWeight: "bold",
+                background: isDarkMode
+                  ? "linear-gradient(135deg, #f3f4f6, #d1d5db)"
+                  : "linear-gradient(135deg, #1f2937, #4b5563)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
               gutterBottom
             >
               Deposit Funds
             </Typography>
 
-            <Typography variant="body1" className="text-gray-600">
+            <Typography variant="body1" color="text.secondary">
               Submit a deposit request to add funds to your wallet
             </Typography>
           </Box>
@@ -108,7 +183,7 @@ const Deposit = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <AttachMoney className="text-gray-400" />
+                    <AttachMoney sx={{ color: theme.palette.text.secondary }} />
                   </InputAdornment>
                 ),
               }}
@@ -116,12 +191,18 @@ const Deposit = () => {
                 mb: 4,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  backgroundColor: isDarkMode
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(255,255,255,0.8)",
                   "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(255,255,255,0.9)",
                   },
                   "&.Mui-focused": {
-                    backgroundColor: "rgba(255, 255, 255, 1)",
+                    backgroundColor: isDarkMode
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(255,255,255,1)",
                   },
                 },
               }}
@@ -133,32 +214,54 @@ const Deposit = () => {
               variant="contained"
               onClick={handleDeposit}
               disabled={isLoading}
-              className="h-12 rounded-xl font-semibold text-base transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
               sx={{
+                height: 48,
+                borderRadius: 3,
+                fontWeight: 600,
+                fontSize: "1rem",
+                transition: "all 0.2s ease",
                 background: "linear-gradient(135deg, #38b2ac 0%, #3182ce 100%)",
                 "&:hover": {
                   background:
                     "linear-gradient(135deg, #2c7a7b 0%, #2b6cb0 100%)",
+                  transform: "scale(1.02)",
+                  boxShadow: "0 10px 25px -5px rgba(56, 178, 172, 0.4)",
                 },
                 "&:disabled": {
-                  background: "rgba(156, 163, 175, 0.5)",
+                  background: isDarkMode
+                    ? "rgba(156, 163, 175, 0.3)"
+                    : "rgba(156, 163, 175, 0.5)",
+                  transform: "none",
                 },
                 textTransform: "none",
               }}
             >
               {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Processing...</span>
-                </div>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 20,
+                      height: 20,
+                      border: "2px solid white",
+                      borderTop: "2px solid transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                      "@keyframes spin": {
+                        "0%": { transform: "rotate(0deg)" },
+                        "100%": { transform: "rotate(360deg)" },
+                      },
+                    }}
+                  />
+                  <Typography>Processing...</Typography>
+                </Box>
               ) : (
                 "Request Deposit"
               )}
             </Button>
           </Box>
         </Paper>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

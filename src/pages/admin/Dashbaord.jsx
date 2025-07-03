@@ -1,15 +1,12 @@
-// Code-split & optimized AdminDashboard.jsx
-
 import React, { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import {
   Container,
   Paper,
   Typography,
   Box,
-  Button,
-  Chip,
   Grid,
-  Fade,
+  CircularProgress,
+  useTheme,
 } from "@mui/material";
 import { Dashboard as DashboardIcon } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,11 +22,17 @@ import {
 } from "../../features/transaction/txnSlice";
 
 const StatCard = lazy(() => import("../../components/admin/StatCard"));
-const TransactionTabs = lazy(() => import("../../components/admin/TransactionTabs"));
-const TransactionTable = lazy(() =>import("../../components/admin/TransactionTable"));
+const TransactionTabs = lazy(() =>
+  import("../../components/admin/TransactionTabs")
+);
+const TransactionTable = lazy(() =>
+  import("../../components/admin/TransactionTable")
+);
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [activeTab, setActiveTab] = useState("deposits");
 
   const { pendingDeposits, pendingWithdrawals } = useSelector(
@@ -63,7 +66,6 @@ const AdminDashboard = () => {
     () => pendingWithdrawals.filter((w) => w.status === "pending"),
     [pendingWithdrawals]
   );
-
   const pendingTransfersData = useMemo(
     () =>
       txns.filter(
@@ -75,7 +77,6 @@ const AdminDashboard = () => {
       ),
     [txns]
   );
-
   const rejectedDeposits = useMemo(
     () => pendingDeposits.filter((d) => d.status === "rejected"),
     [pendingDeposits]
@@ -182,17 +183,29 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <Container maxWidth="xl" sx={{ py: 4, position: "relative", zIndex: 1 }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: isDarkMode
+          ? "linear-gradient(to bottom right, #1e1e1e, #2c2c2c)"
+          : "linear-gradient(to bottom right, #ebf4ff, #fce7f3)",
+        py: 4,
+      }}
+    >
+      <Container maxWidth="xl">
         <Paper
           elevation={0}
           sx={{
-            borderRadius: 4,
-            padding: 3,
+            borderRadius: 2,
+            p: 3,
             mb: 4,
-            background: "rgba(255, 255, 255, 0.85)",
+            backgroundColor: isDarkMode
+              ? "rgba(30,30,30,0.85)"
+              : "rgba(255,255,255,0.85)",
             backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
+            border: `1px solid ${
+              isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+            }`,
           }}
         >
           <Box display="flex" alignItems="center" gap={2} mb={2}>
@@ -213,7 +226,12 @@ const AdminDashboard = () => {
           </Box>
         </Paper>
 
-        <Suspense fallback={<div>Loading stats...</div>}>
+        {/* Stat Cards */}
+        <Suspense
+          fallback={
+            <CircularProgress sx={{ display: "block", mx: "auto", my: 4 }} />
+          }
+        >
           <Grid container spacing={3} sx={{ mb: 4 }}>
             {stats.map((stat, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
@@ -223,17 +241,26 @@ const AdminDashboard = () => {
           </Grid>
         </Suspense>
 
+        {/* Transaction Tabs + Table */}
         <Paper
           elevation={0}
           sx={{
-            borderRadius: 4,
-            background: "rgba(255, 255, 255, 0.85)",
+            borderRadius: 2,
+            backgroundColor: isDarkMode
+              ? "rgba(30,30,30,0.85)"
+              : "rgba(255,255,255,0.85)",
             backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
+            border: `1px solid ${
+              isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+            }`,
             overflow: "hidden",
           }}
         >
-          <Suspense fallback={<div>Loading tabs...</div>}>
+          <Suspense
+            fallback={
+              <CircularProgress sx={{ display: "block", mx: "auto", my: 4 }} />
+            }
+          >
             <TransactionTabs
               tabs={tabData}
               activeTab={activeTab}
@@ -270,8 +297,8 @@ const AdminDashboard = () => {
           </Suspense>
         </Paper>
       </Container>
-    </div>
-  );
+    </Box>
+  );  
 };
 
 export default AdminDashboard;

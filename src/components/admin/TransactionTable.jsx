@@ -1,4 +1,3 @@
-// components/TransactionTable.jsx
 import React from "react";
 import {
   Table,
@@ -14,6 +13,7 @@ import {
   Fade,
   Button,
   Tooltip,
+  useTheme,
 } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
 
@@ -26,6 +26,8 @@ const getActualType = (item) => {
 };
 
 const TransactionTable = ({ data, type, onApprove, onReject }) => {
+    const theme = useTheme();
+      const isDarkMode = theme.palette.mode === "dark";
   const getColumns = () => {
     const baseCols = [
       { key: "id", label: "Transaction ID" },
@@ -56,7 +58,10 @@ const TransactionTable = ({ data, type, onApprove, onReject }) => {
             {columns.map((col) => (
               <TableCell
                 key={col.key}
-                sx={{ fontWeight: 600, color: "text.secondary" }}
+                sx={{
+                  fontWeight: 600,
+                  color: "text.secondary"
+                }}
               >
                 {col.label}
               </TableCell>
@@ -77,10 +82,17 @@ const TransactionTable = ({ data, type, onApprove, onReject }) => {
               <Fade in timeout={300 * (index + 1)} key={item.id}>
                 <TableRow
                   hover
-                  sx={{ "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.02)" } }}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(0, 0, 0, 0.02)",
+                    },
+                  }}
                 >
                   <TableCell>
-                    <Typography variant="body2" fontFamily="monospace">
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "monospace" }}
+                    >
                       {item.id.slice(0, 8)}...
                     </Typography>
                   </TableCell>
@@ -88,7 +100,11 @@ const TransactionTable = ({ data, type, onApprove, onReject }) => {
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Avatar
-                        sx={{ width: 24, height: 24, fontSize: "0.75rem" }}
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          fontSize: "0.75rem",
+                        }}
                       >
                         {(item.userId || item.from)?.toString().slice(0, 2) ||
                           "N/A"}
@@ -148,7 +164,13 @@ const TransactionTable = ({ data, type, onApprove, onReject }) => {
                     <Chip
                       label={item.status || "pending"}
                       size="small"
-                      color={item.status === "approved" ? "success" : "warning"}
+                      color={
+                        item.status === "approved"
+                          ? "success"
+                          : item.status === "rejected"
+                          ? "error"
+                          : "warning"
+                      }
                       variant="outlined"
                       sx={{ textTransform: "capitalize" }}
                     />
@@ -178,12 +200,14 @@ const TransactionTable = ({ data, type, onApprove, onReject }) => {
                                 },
                                 textTransform: "none",
                                 fontWeight: 600,
+                                px: 1.5,
                               }}
                             >
                               <CheckCircle sx={{ fontSize: 16, mr: 0.5 }} />{" "}
                               Approve
                             </Button>
                           </Tooltip>
+
                           <Tooltip title="Reject Transaction">
                             <Button
                               variant="outlined"
@@ -195,7 +219,11 @@ const TransactionTable = ({ data, type, onApprove, onReject }) => {
                                   type === "mixed" ? getActualType(item) : type
                                 )
                               }
-                              sx={{ textTransform: "none", fontWeight: 600 }}
+                              sx={{
+                                textTransform: "none",
+                                fontWeight: 600,
+                                px: 1.5,
+                              }}
                             >
                               Reject
                             </Button>
