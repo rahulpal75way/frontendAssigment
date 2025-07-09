@@ -15,14 +15,17 @@ import {
 } from "@mui/material";
 import { AccountBalanceWallet, AttachMoney } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import { useRequestWithdrawalMutation } from "../../services/api";
+import { useGetWalletQuery, useRequestWithdrawalMutation } from "../../services/api";
 
 const Withdraw = () => {
   // const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
-
+  const { data: walletData } = useGetWalletQuery(user.id, {
+        refetchOnMountOrArgChange: true,
+      });
+      const balance = walletData?.balance || 0;
   const [amount, setAmount] = useState("");
   const [errors, setErrors] = useState({});
   const [requestWithdrawal, {isLoading}] = useRequestWithdrawalMutation();
@@ -40,6 +43,13 @@ const Withdraw = () => {
 
   const handleWithdraw = async () => {
     if (!validateForm()) return;
+
+     const numericAmount = parseFloat(amount);
+    
+        if (numericAmount > balance) {
+          toast.error("Insufficient balance for this transfer.");
+          return;
+        }
 
     try {
       await requestWithdrawal({

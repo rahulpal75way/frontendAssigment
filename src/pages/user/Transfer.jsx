@@ -3,7 +3,7 @@ import {
   // useDispatch,
   useSelector
 } from "react-redux";
-import { useTransferTransactionMutation } from "../../services/api";
+import { useGetWalletQuery, useTransferTransactionMutation } from "../../services/api";
 
 import {
   TextField,
@@ -35,6 +35,10 @@ const Transfer = () => {
     () => allUsers.filter((u) => u.id !== user.id && u.role !== "ADMIN"),
     [allUsers, user.id]
   );
+  const { data: walletData } = useGetWalletQuery(user.id, {
+      refetchOnMountOrArgChange: true,
+    });
+    const balance = walletData?.balance || 0;
 
 
   const [to, setTo] = useState("");
@@ -67,13 +71,20 @@ const Transfer = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    const numericAmount = parseFloat(amount);
+
+    if (numericAmount > balance) {
+      toast.error("Insufficient balance for this transfer.");
+      return;
+    }
+
     try {
       await transferTransaction({
         userId: user.id,
         receiverId: to,
-        amount: parseFloat(amount),
+        amount: numericAmount,
         type,
-        action: "transfer", // must match your Prisma schema
+        action: "transfer",
       }).unwrap();
 
       setTo("");

@@ -27,7 +27,7 @@ const CommissionSummaryCard = lazy(() =>
 const Commissions = () => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
-  const { data, isLoading } = useGetCommissionsQuery();
+  const { data, } = useGetCommissionsQuery();
 
   const commissions = useMemo(() => data?.data || [], [data]);
 

@@ -7,6 +7,7 @@ import {
   GetApp,
   Add,
   History as HistoryIcon,
+  SwapHoriz,
 } from "@mui/icons-material";
 import StatsCard from "../../components/StatsCard";
 import QuickActionCard from "../../components/QuickActionCard";
@@ -52,11 +53,11 @@ const UserDashboard = () => {
       .reduce((sum, w) => sum + w.amount, 0);
   }, [withdrawals]);
 
-  // const totalTransfers = useMemo(() => {
-  //   return withdrawals
-  //     .filter((t) => t.action === "transfer" && t.status === "approved")
-  //     .reduce((sum, t) => sum + t.amount, 0);
-  // }, [withdrawals]);
+  const totalTransfers = useMemo(() => {
+    return withdrawals
+      .filter((t) => t.action === "transfer" && t.status === "approved")
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [withdrawals]);
 
   const recentTransactions = useMemo(() => {
     const allTxns = [...deposits, ...withdrawals];
@@ -103,8 +104,16 @@ const UserDashboard = () => {
         icon: <GetApp />,
         color: "from-red-500 to-pink-500",
       },
+      {
+        title: "Total Transfers",
+        value: `₹${totalTransfers.toFixed(2)}`,
+        change: "+3%",
+        trend: "up",
+        icon: <SwapHoriz />, // or any appropriate transfer icon
+        color: "from-purple-500 to-indigo-500",
+      },
     ],
-    [balance, totalDeposits, totalWithdrawals]
+    [balance, totalDeposits, totalWithdrawals, totalTransfers]
   );
   
   const quickActions = [
