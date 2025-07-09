@@ -104,8 +104,7 @@ export const authSlice = createSlice({
     builder
       .addMatcher(
         isAnyOf(
-          api.endpoints.login.matchPending,
-          api.endpoints.logout.matchPending
+          api.endpoints.login.matchPending
         ),
         (state) => {
           state.loading = true;
@@ -117,9 +116,7 @@ export const authSlice = createSlice({
       })
       .addMatcher(
         isAnyOf(
-          api.endpoints.login.matchRejected,
-          api.endpoints.logout.matchFulfilled,
-          api.endpoints.logout.matchRejected
+          api.endpoints.login.matchRejected
         ),
         (state) => {
           return _resetTokens(state);

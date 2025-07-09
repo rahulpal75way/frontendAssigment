@@ -225,6 +225,13 @@ const AdminDashboard = () => {
               <Typography
                 variant="h4"
                 className="font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent"
+                sx={{
+                  background: isDarkMode
+                    ? "linear-gradient(to right, #f3f4f6, #d1d5db)"
+                    : "linear-gradient(to right, #1f2937, #374151)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
               >
                 Admin Dashboard
               </Typography>

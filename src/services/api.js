@@ -25,47 +25,6 @@ export const api = createApi({
         body,
       }),
     }),
-    updateUser: builder.mutation({
-      query: (body) => ({
-        url: `/users/${body._id}`,
-        method: "PUT",
-        body,
-      }),
-    }),
-    logout: builder.mutation({
-      query: () => ({
-        url: `/users/logout`,
-        method: "POST",
-      }),
-    }),
-    changePassword: builder.mutation({
-      query: (body) => ({
-        url: `/users/change-password`,
-        method: "POST",
-        body,
-      }),
-    }),
-    resetPassword: builder.mutation({
-      query: (body) => ({
-        url: `/users/reset-password`,
-        method: "POST",
-        body,
-      }),
-    }),
-    verfiyInvitation: builder.mutation({
-      query: (body) => ({
-        url: `/users/verify-invitation`,
-        method: "POST",
-        body,
-      }),
-    }),
-    forgotPassword: builder.mutation({
-      query: (body) => ({
-        url: `/users/forgot-password`,
-        method: "POST",
-        body,
-      }),
-    }),
 
     // --- WALLET APIs ---
     getWallet: builder.query({
@@ -148,13 +107,7 @@ export const api = createApi({
 export const {
   useMeQuery,
   useLoginMutation,
-  useLogoutMutation,
   useRegisterMutation,
-  useUpdateUserMutation,
-  useChangePasswordMutation,
-  useForgotPasswordMutation,
-  useResetPasswordMutation,
-  useVerfiyInvitationMutation,
 
   // Wallet
   useGetWalletQuery,

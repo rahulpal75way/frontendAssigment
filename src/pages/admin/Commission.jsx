@@ -16,6 +16,7 @@ import {
 } from "@mui/icons-material";
 // import { useSelector } from "react-redux";
 import { useGetCommissionsQuery } from "../../services/api";
+import { useSelector } from "react-redux";
 
 const CommissionTable = lazy(() =>
   import("../../components/commission/CommissionTable")
@@ -27,7 +28,10 @@ const CommissionSummaryCard = lazy(() =>
 const Commissions = () => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
-  const { data, } = useGetCommissionsQuery();
+  const user = useSelector((state) => state.auth.user);
+  const { data } = useGetCommissionsQuery(user.id, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const commissions = useMemo(() => data?.data || [], [data]);
 
