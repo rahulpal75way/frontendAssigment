@@ -37,14 +37,21 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
   };
 
   const getTransactionType = (txn) => {
-    if (txn.action === "deposit")
+    if (txn.action === "deposit") {
       return { type: "deposit", icon: <ArrowDownward /> };
-    if (txn.action === "withdrawal")
+    }
+    if (txn.action === "withdrawal") {
       return { type: "withdrawal", icon: <ArrowUpward /> };
-    if (txn.from === userId) return { type: "sent", icon: <TrendingUp /> };
-    if (txn.to === userId) return { type: "received", icon: <TrendingDown /> };
+    }
+    if (txn.userId === userId) {
+      return { type: "sent", icon: <TrendingUp /> };
+    }
+    if (txn.receiverId === userId) {
+      return { type: "received", icon: <TrendingDown /> };
+    }
     return { type: "-", icon: null };
   };
+  
 
   return (
     <TableContainer
@@ -131,7 +138,6 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
                       #{txn.id}
                     </Typography>
                   </TableCell>
-
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       {icon}
@@ -146,10 +152,8 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
                       </Typography>
                     </Box>
                   </TableCell>
-
-                  <TableCell>{txn.from}</TableCell>
-                  <TableCell>{txn.to}</TableCell>
-
+                  <TableCell>{txn.userId}</TableCell>
+                  <TableCell>{txn.receiverId || "-"}</TableCell>
                   <TableCell>
                     <Typography
                       variant="body2"
@@ -161,7 +165,6 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
                       {isSent ? "-" : "+"}₹{txn.amount.toFixed(2)}
                     </Typography>
                   </TableCell>
-
                   <TableCell>
                     <Chip
                       label={txn.type}
@@ -175,7 +178,6 @@ const TransactionTable = ({ txns = [], userId = "" }) => {
                       }}
                     />
                   </TableCell>
-
                   <TableCell>
                     <Chip
                       label={txn.status}

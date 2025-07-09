@@ -80,71 +80,73 @@ const CommissionTable = ({
               </TableHead>
 
               <TableBody>
-                {commissions.map((commission, index) => (
-                  <TableRow
-                    key={commission.txnId}
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                      "&:hover": {
-                        backgroundColor: isDarkMode
-                          ? "rgba(255,255,255,0.03)"
-                          : "rgba(99,102,241,0.03)",
-                      },
-                    }}
-                  >
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={2}>
-                        <Avatar
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            fontSize: 14,
-                            fontWeight: "bold",
-                            background:
-                              "linear-gradient(to right, #60A5FA, #A78BFA)",
-                            color: "#fff",
-                          }}
-                        >
-                          {index + 1}
-                        </Avatar>
+                {commissions.map((commission, index) => {
+                  const txnId = commission.txn?.id || commission.txnId;
+                  const type = commission.txn?.type || commission.type;
+
+                  return (
+                    <TableRow
+                      key={txnId}
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                        "&:hover": {
+                          backgroundColor: isDarkMode
+                            ? "rgba(255,255,255,0.03)"
+                            : "rgba(99,102,241,0.03)",
+                        },
+                      }}
+                    >
+                      <TableCell>
+                        <Box display="flex" alignItems="center" gap={2}>
+                          <Avatar
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              fontSize: 14,
+                              fontWeight: "bold",
+                              background:
+                                "linear-gradient(to right, #60A5FA, #A78BFA)",
+                              color: "#fff",
+                            }}
+                          >
+                            {index + 1}
+                          </Avatar>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "monospace",
+                              color: theme.palette.text.secondary,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {formatTxnId(txnId)}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+
+                      <TableCell>
+                        <Chip
+                          icon={getTypeIcon(type)}
+                          label={type.charAt(0).toUpperCase() + type.slice(1)}
+                          color={getTypeColor(type)}
+                          variant="outlined"
+                          size="small"
+                          sx={{ textTransform: "capitalize" }}
+                        />
+                      </TableCell>
+
+                      <TableCell align="right">
                         <Typography
-                          variant="body2"
-                          sx={{
-                            fontFamily: "monospace",
-                            color: theme.palette.text.secondary,
-                            whiteSpace: "nowrap",
-                          }}
+                          variant="body1"
+                          fontWeight={600}
+                          sx={{ color: "success.main" }}
                         >
-                          {formatTxnId(commission.txnId)}
+                          ${commission.amount.toFixed(2)}
                         </Typography>
-                      </Box>
-                    </TableCell>
-
-                    <TableCell>
-                      <Chip
-                        icon={getTypeIcon(commission.type)}
-                        label={
-                          commission.type.charAt(0).toUpperCase() +
-                          commission.type.slice(1)
-                        }
-                        color={getTypeColor(commission.type)}
-                        variant="outlined"
-                        size="small"
-                        sx={{ textTransform: "capitalize" }}
-                      />
-                    </TableCell>
-
-                    <TableCell align="right">
-                      <Typography
-                        variant="body1"
-                        fontWeight={600}
-                        sx={{ color: "success.main" }}
-                      >
-                        ${commission.amount.toFixed(2)}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </Box>

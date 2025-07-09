@@ -14,7 +14,8 @@ import {
   GetApp,
   CallMade,
 } from "@mui/icons-material";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
+import { useGetCommissionsQuery } from "../../services/api";
 
 const CommissionTable = lazy(() =>
   import("../../components/commission/CommissionTable")
@@ -26,8 +27,9 @@ const CommissionSummaryCard = lazy(() =>
 const Commissions = () => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
+  const { data, isLoading } = useGetCommissionsQuery();
 
-  const { commissions } = useSelector((state) => state.txns);
+  const commissions = useMemo(() => data?.data || [], [data]);
 
   const total = useMemo(
     () => commissions.reduce((sum, c) => sum + c.amount, 0),
@@ -36,10 +38,12 @@ const Commissions = () => {
 
   const typeStats = useMemo(() => {
     return commissions.reduce((acc, commission) => {
-      acc[commission.type] = (acc[commission.type] || 0) + commission.amount;
+      const type = commission.txn?.type || commission.type;
+      acc[type] = (acc[type] || 0) + commission.amount;
       return acc;
     }, {});
   }, [commissions]);
+  
 
   const getTypeIcon = useCallback((type) => {
     switch (type) {

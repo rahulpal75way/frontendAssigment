@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { handleRequestDeposit } from "../../features/wallet/walletSlice";
+import {
+  // useDispatch,
+  useSelector
+} from "react-redux";
 import {
   TextField,
   Button,
@@ -12,9 +14,11 @@ import {
 } from "@mui/material";
 import { AccountBalanceWallet, AttachMoney } from "@mui/icons-material";
 import toast from "react-hot-toast";
+import { useRequestDepositMutation } from "../../services/api";
 
 const Deposit = () => {
-  const dispatch = useDispatch();
+  const [requestDeposit] = useRequestDepositMutation();
+
   const user = useSelector((state) => state.auth.user);
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -36,23 +40,29 @@ const Deposit = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     if (!validateForm()) return;
-
     setIsLoading(true);
 
-    setTimeout(() => {
-      dispatch(
-        handleRequestDeposit({
-          userId: user.id,
-          amount: parseFloat(amount),
-        })
-      );
+    try {
+      await requestDeposit({
+        userId: user.id,
+        amount: parseFloat(amount),
+        action: "deposit", // Required by backend validator
+        type: "deposit", // Required by backend validator
+      }).unwrap();
+
       setAmount("");
-      setIsLoading(false);
       toast.success("Deposit request submitted for admin approval.");
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit deposit request.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
+  
 
   return (
     <Box

@@ -21,49 +21,48 @@ import {
   LoginOutlined,
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import { login } from "../../features/auth/authSlice";
-import { Link, useNavigate } from "react-router-dom";
-import { mockUsers } from "../../utils/data";
+import {
+  Link,
+  // useNavigate
+} from "react-router-dom";
+// import { mockUsers } from "../../utils/data";
 import { useForm } from "react-hook-form";
 import ThemeToggleButton from "../../components/ThemeToggleButton";
+import { useLoginMutation } from "../../services/api";
+import { setTokens } from "../../store/reducers/authReducers";
 
 const Login = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const [loginApi, { isLoading }] = useLoginMutation();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [generalError, setGeneralError] = useState("");
 
   const {
     register,
     handleSubmit,
-    setError,
-    clearErrors,
     formState: { errors },
   } = useForm();
 
   const onSubmit = async ({ email, password }) => {
-    setIsLoading(true);
     setGeneralError("");
 
-    setTimeout(() => {
-      const user = mockUsers.find(
-        (u) => u.email === email && u.password === password
+    try {
+      const res = await loginApi({ email, password }).unwrap();
+      localStorage.setItem("access_token", res.data.accessToken);
+      localStorage.setItem("refresh_token", res.data.refreshToken);
+      dispatch(setTokens(res.data));
+    } catch (err) {
+      setGeneralError(
+        err?.data?.message || "Something went wrong. Please try again."
       );
-
-      if (user) {
-        dispatch(login(user));
-        navigate(user.role === "admin" ? "/admin/dashboard" : "/dashboard");
-      } else {
-        setGeneralError("Invalid email or password");
-      }
-
-      setIsLoading(false);
-    }, 1000);
+    }
   };
+  
 
   return (
     <Box

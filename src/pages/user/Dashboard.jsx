@@ -11,44 +11,62 @@ import {
 import StatsCard from "../../components/StatsCard";
 import QuickActionCard from "../../components/QuickActionCard";
 import RecentTransactionCard from "../../components/RecentTransactionCard";
+import { useGetUserTransactionsQuery, useGetWalletQuery } from "../../services/api";
+
+
 
 
 
 const UserDashboard = () => {
   const user = useSelector((state) => state.auth.user);
-  const balance = useSelector((state) => state.wallet.balances[user.id] || 0);
-  const users = useSelector((state) => state.users.users);
-  const txns = useSelector((state) => state.txns.txns);
-  const deposits = useSelector((state) => state.wallet.pendingDeposits);
-  const withdrawals = useSelector((state) => state.wallet.pendingWithdrawals);
+  const users = useSelector((state) => state.auth.users);
 
-  const totalTransfers = useMemo(
-    () =>
-      txns
-        .filter(
-          (txn) =>
-            (txn.from === user.id || txn.to === user.id) &&
-            txn.status === "approved"
-        )
-        .reduce((sum, txn) => sum + txn.amount, 0),
-    [txns, user.id]
-  );
 
-  const totalDeposits = useMemo(
-    () =>
-      deposits
-        .filter((d) => d.userId === user.id && d.status === "approved")
-        .reduce((sum, d) => sum + d.amount, 0),
-    [deposits, user.id]
-  );
+  const { data: txns = [], isLoading: txnsLoading } =
+    useGetUserTransactionsQuery(user.id, {
+      refetchOnMountOrArgChange: true,
+      // pollingInterval: 3000, // optional: auto-refresh every 3s
+    });
 
-  const totalWithdrawals = useMemo(
-    () =>
-      withdrawals
-        .filter((w) => w.userId === user.id && w.status === "approved")
-        .reduce((sum, w) => sum + w.amount, 0),
-    [withdrawals, user.id]
-  );
+  const { data: walletData } = useGetWalletQuery(user.id, {
+    refetchOnMountOrArgChange: true,
+  });
+  const balance = walletData?.balance || 0;
+
+  console.log("Transactions:", txns);
+  console.log("Wallet Balance:", walletData);
+
+
+  const deposits = walletData?.deposits || [];
+  const withdrawals = walletData?.withdrawals || [];
+
+  const totalDeposits = useMemo(() => {
+    return deposits
+      .filter((d) => d.status === "approved")
+      .reduce((sum, d) => sum + d.amount, 0);
+  }, [deposits]);
+
+  const totalWithdrawals = useMemo(() => {
+    return withdrawals
+      .filter((w) => w.action === "withdrawal" && w.status === "approved")
+      .reduce((sum, w) => sum + w.amount, 0);
+  }, [withdrawals]);
+
+  // const totalTransfers = useMemo(() => {
+  //   return withdrawals
+  //     .filter((t) => t.action === "transfer" && t.status === "approved")
+  //     .reduce((sum, t) => sum + t.amount, 0);
+  // }, [withdrawals]);
+
+  const recentTransactions = useMemo(() => {
+    const allTxns = [...deposits, ...withdrawals];
+    return allTxns
+      .filter((txn) => txn.userId === user.id || txn.receiverId === user.id)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+  }, [deposits, withdrawals, user.id]);
+
+  
 
   const getUserName = useCallback(
     (id) => {
@@ -88,16 +106,7 @@ const UserDashboard = () => {
     ],
     [balance, totalDeposits, totalWithdrawals]
   );
-
-  const recentTransactions = useMemo(
-    () =>
-      txns
-        .filter((txn) => txn.from === user.id || txn.to === user.id)
-        .slice(-5)
-        .reverse(),
-    [txns, user.id]
-  );
-
+  
   const quickActions = [
     {
       title: "Send Money",
@@ -124,6 +133,8 @@ const UserDashboard = () => {
       path: "/history",
     },
   ];
+
+  console.log("loading", txnsLoading);
 
   return (
     <div className="space-y-6 p-5">
@@ -164,8 +175,8 @@ const UserDashboard = () => {
               </div>
               <div className="space-y-4">
                 {recentTransactions.map((txn) => {
-                  const isSender = txn.from === user.id;
-                  const otherParty = isSender ? txn.to : txn.from;
+                  const isSender = txn.userId === user.id;
+                  const otherParty = txn.receiverId || txn.userId;
                   const otherName = getUserName(otherParty);
                   return (
                     <RecentTransactionCard

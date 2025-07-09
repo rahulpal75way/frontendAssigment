@@ -35,9 +35,9 @@ import {
 } from "@mui/icons-material";
 import useAuth from "../hooks/useAuth";
 import { useDispatch } from "react-redux";
-import { logout } from "../features/auth/authSlice";
 import ErrorBoundary from "../components/ErrorBoundary";
 import ThemeToggleButton from "../components/ThemeToggleButton";
+import { resetTokens } from "../store/reducers/authReducers";
 
 const UserLayout = () => {
   const user = useAuth();
@@ -51,7 +51,7 @@ const UserLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   if (!user) return <Navigate to="/login" replace />;
-  if (user?.role !== "user") return <div>Unauthorized</div>;
+  if (!["USER", "CANDIDATE"].includes(user?.role)) return <div>Unauthorized</div>;
 
   const navigationItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
@@ -70,7 +70,7 @@ const UserLayout = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(resetTokens());
     setAnchorEl(null);
     handleProfileMenuClose();
   };

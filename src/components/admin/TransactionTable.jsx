@@ -13,7 +13,7 @@ import {
   Fade,
   Button,
   Tooltip,
-  useTheme,
+  // useTheme,
 } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
 
@@ -26,8 +26,8 @@ const getActualType = (item) => {
 };
 
 const TransactionTable = ({ data, type, onApprove, onReject }) => {
-    const theme = useTheme();
-      const isDarkMode = theme.palette.mode === "dark";
+    // const theme = useTheme();
+      // const isDarkMode = theme.palette.mode === "dark";
   const getColumns = () => {
     const baseCols = [
       { key: "id", label: "Transaction ID" },

@@ -1,4 +1,5 @@
 import React from "react";
+import FallbackUI from "./FallbackUI";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -22,9 +23,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div style={{ padding: "1rem", color: "red" }}>
-          <h2>⚠️ Something went wrong.</h2>
-          <p>{this.state.errorMessage}</p>
-          <button onClick={this.handleRetry}>🔄 Retry</button>
+          <FallbackUI/>
         </div>
       );
     }

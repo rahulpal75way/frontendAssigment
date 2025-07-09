@@ -9,17 +9,15 @@ import {
   useTheme,
 } from "@mui/material";
 import { Dashboard as DashboardIcon } from "@mui/icons-material";
-import { useDispatch, useSelector } from "react-redux";
 import {
-  handleApproveDeposit,
-  handleApproveWithdrawal,
-  handleRejectDeposit,
-  handleRejectWithdrawal,
-} from "../../features/wallet/walletSlice";
+  // useDispatch,
+  useSelector,
+} from "react-redux";
 import {
-  approveTransfer,
-  rejectTransfer,
-} from "../../features/transaction/txnSlice";
+  useGetAllTransactionsQuery,
+  useApproveTransactionMutation,
+  useRejectTransactionMutation,
+} from "../../services/api";
 
 const StatCard = lazy(() => import("../../components/admin/StatCard"));
 const TransactionTabs = lazy(() =>
@@ -30,69 +28,80 @@ const TransactionTable = lazy(() =>
 );
 
 const AdminDashboard = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
+  const [approveTransaction] = useApproveTransactionMutation();
+  const [rejectTransaction] = useRejectTransactionMutation();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
   const [activeTab, setActiveTab] = useState("deposits");
+  const user = useSelector((state) => state.auth.user);
 
-  const { pendingDeposits, pendingWithdrawals } = useSelector(
-    (state) => state.wallet
-  );
-  const { txns } = useSelector((state) => state.txns);
+  const { data: txns = [], isLoading: txnsLoading } =
+    useGetAllTransactionsQuery(user.id, {
+      refetchOnMountOrArgChange: true,
+    });
 
   const handleApprove = useCallback(
-    (id, type) => {
-      if (type === "deposit") dispatch(handleApproveDeposit(id));
-      else if (type === "withdraw") dispatch(handleApproveWithdrawal(id));
-      else if (type === "transfer") dispatch(approveTransfer({ id }));
+    async (id) => {
+      try {
+        await approveTransaction(id).unwrap();
+      } catch (err) {
+        console.error("Approval failed", err);
+      }
     },
-    [dispatch]
+    [approveTransaction]
   );
 
   const handleReject = useCallback(
-    (id, type) => {
-      if (type === "deposit") dispatch(handleRejectDeposit(id));
-      else if (type === "withdraw") dispatch(handleRejectWithdrawal(id));
-      else if (type === "transfer") dispatch(rejectTransfer({ id }));
+    async (id) => {
+      try {
+        await rejectTransaction(id).unwrap();
+      } catch (err) {
+        console.error("Rejection failed", err);
+      }
     },
-    [dispatch]
+    [rejectTransaction]
   );
 
+  // PENDING
   const pendingDepositsData = useMemo(
-    () => pendingDeposits.filter((d) => d.status === "pending"),
-    [pendingDeposits]
+    () => txns.filter((t) => t.type === "deposit" && t.status === "pending"),
+    [txns]
   );
   const pendingWithdrawalsData = useMemo(
-    () => pendingWithdrawals.filter((w) => w.status === "pending"),
-    [pendingWithdrawals]
+    () => txns.filter((t) => t.type === "withdrawal" && t.status === "pending"),
+    [txns]
   );
   const pendingTransfersData = useMemo(
     () =>
       txns.filter(
         (t) =>
-          t.from &&
-          t.to &&
-          (!t.status || t.status === "pending") &&
-          ["local", "international"].includes(t.type)
+          ["local", "intl"].includes(t.type) &&
+          t.status === "pending" &&
+          t.user &&
+          t.receiver
       ),
     [txns]
   );
+
+  // REJECTED
   const rejectedDeposits = useMemo(
-    () => pendingDeposits.filter((d) => d.status === "rejected"),
-    [pendingDeposits]
+    () => txns.filter((t) => t.type === "deposit" && t.status === "rejected"),
+    [txns]
   );
   const rejectedWithdrawals = useMemo(
-    () => pendingWithdrawals.filter((w) => w.status === "rejected"),
-    [pendingWithdrawals]
+    () =>
+      txns.filter((t) => t.type === "withdrawal" && t.status === "rejected"),
+    [txns]
   );
   const rejectedTransfers = useMemo(
     () =>
       txns.filter(
         (t) =>
+          ["local", "intl"].includes(t.type) &&
           t.status === "rejected" &&
-          t.from &&
-          t.to &&
-          ["local", "international"].includes(t.type)
+          t.user &&
+          t.receiver
       ),
     [txns]
   );
@@ -232,13 +241,22 @@ const AdminDashboard = () => {
             <CircularProgress sx={{ display: "block", mx: "auto", my: 4 }} />
           }
         >
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            {stats.map((stat, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <StatCard stat={stat} delay={300 * (index + 1)} />
+          {txnsLoading ? (
+            <Box display="flex" justifyContent="center" my={5}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <>
+              {/* existing stat cards */}
+              <Grid container spacing={3} sx={{ mb: 4 }}>
+                {stats.map((stat, index) => (
+                  <Grid item xs={12} sm={6} md={3} key={index}>
+                    <StatCard stat={stat} delay={300 * (index + 1)} />
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
+            </>
+          )}
         </Suspense>
 
         {/* Transaction Tabs + Table */}
@@ -288,8 +306,8 @@ const AdminDashboard = () => {
                   <TransactionTable
                     data={tab.data}
                     type={tab.type}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
+                    onApprove={(id) => handleApprove(id)}
+                    onReject={(id) => handleReject(id)}
                   />
                 </Box>
               ))}
@@ -298,7 +316,7 @@ const AdminDashboard = () => {
         </Paper>
       </Container>
     </Box>
-  );  
+  );
 };
 
 export default AdminDashboard;

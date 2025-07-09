@@ -2,18 +2,26 @@ import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import HeaderSection from "../../components/HeaderSection";
 import TransactionTable from "../../components/TransactionTable";
-import { Box, useTheme } from "@mui/material";
+import { Box, useTheme, CircularProgress } from "@mui/material";
+import { useGetUserTransactionsQuery } from "../../services/api"; // ✅ import RTK hook
 
 const TxnHistory = () => {
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
-
   const user = useSelector((state) => state.auth.user);
-  const { txns } = useSelector((state) => state.txns);
+
+  const {
+    data = [],
+    isLoading,
+    isFetching, // <-- add this
+    isError,
+  } = useGetUserTransactionsQuery(user.id);
 
   const filtered = useMemo(
-    () => txns.filter((t) => t.from === user.id || t.to === user.id),
-    [txns, user.id]
+    () =>
+      data.filter(
+        (txn) => txn.userId === user.id || txn.receiverId === user.id
+      ),
+    [data, user.id]
   );
 
   return (
@@ -77,7 +85,18 @@ const TxnHistory = () => {
         }}
       >
         <HeaderSection />
-        <TransactionTable txns={filtered} userId={user.id} />
+
+        {isLoading || isFetching ? (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : isError ? (
+          <Box sx={{ textAlign: "center", mt: 4, color: "red" }}>
+            Failed to load transactions
+          </Box>
+        ) : (
+          <TransactionTable txns={filtered} userId={user.id} />
+        )}
       </Box>
     </Box>
   );

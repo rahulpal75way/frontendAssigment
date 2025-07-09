@@ -31,9 +31,10 @@ import {
 } from "@mui/icons-material";
 import useAuth from "../hooks/useAuth";
 import { useDispatch } from "react-redux";
-import { logout } from "../features/auth/authSlice";
+// import { logout } from "../features/auth/authSlice";
 import ErrorBoundary from "../components/ErrorBoundary";
 import ThemeToggleButton from "../components/ThemeToggleButton";
+import { resetTokens } from "../store/reducers/authReducers";
 
 const AdminLayout = () => {
   const user = useAuth();
@@ -48,7 +49,7 @@ const AdminLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   if (!user) return <Navigate to="/login" replace />;
-  if (user?.role !== "admin") return <div>Unauthorized</div>;
+  if (user?.role !== "ADMIN") return <div>Unauthorized</div>;
 
   const drawerWidth = sidebarCollapsed ? 70 : 280;
 
@@ -65,7 +66,7 @@ const AdminLayout = () => {
   const handleProfileMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleProfileMenuClose = () => setAnchorEl(null);
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(resetTokens());
     handleProfileMenuClose();
   };
 

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { handleRequestWithdrawal } from "../../features/wallet/walletSlice";
+import {
+  // useDispatch,
+  useSelector
+} from "react-redux";
+// import { handleRequestWithdrawal } from "../../features/wallet/walletSlice";
 import {
   TextField,
   Button,
@@ -12,16 +15,17 @@ import {
 } from "@mui/material";
 import { AccountBalanceWallet, AttachMoney } from "@mui/icons-material";
 import toast from "react-hot-toast";
+import { useRequestWithdrawalMutation } from "../../services/api";
 
 const Withdraw = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
   const [amount, setAmount] = useState("");
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [requestWithdrawal, {isLoading}] = useRequestWithdrawalMutation();
 
   const validateForm = () => {
     const newErrors = {};
@@ -34,22 +38,27 @@ const Withdraw = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
     if (!validateForm()) return;
-    setIsLoading(true);
 
-    setTimeout(() => {
-      dispatch(
-        handleRequestWithdrawal({
-          userId: user.id,
-          amount: parseFloat(amount),
-        })
-      );
+    try {
+      await requestWithdrawal({
+        userId: user.id,
+        amount: parseFloat(amount),
+        action: "withdrawal",
+        type: "withdrawal",
+      }).unwrap();
+
       setAmount("");
-      setIsLoading(false);
       toast.success("Withdrawal request submitted for admin approval.");
-    }, 1000);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit withdrawal request.");
+    } finally {
+      setErrors({});
+    }
   };
+  
 
   return (
     <Box
