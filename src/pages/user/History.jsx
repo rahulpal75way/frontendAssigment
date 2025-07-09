@@ -14,7 +14,9 @@ const TxnHistory = () => {
     isLoading,
     isFetching, // <-- add this
     isError,
-  } = useGetUserTransactionsQuery(user.id);
+  } = useGetUserTransactionsQuery(user.id, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const filtered = useMemo(
     () =>
